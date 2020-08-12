@@ -1,0 +1,24 @@
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework.serializers import ModelSerializer
+from .models import Ride, Incident, ParsedFiles
+
+
+class RideSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Ride
+        geo_field = 'geom'
+        fields = ('timestamps', 'filename')
+
+
+class IncidentSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Incident
+        geo_field = 'geom'
+        fields = ('rideTimestamp', 'bikeType', 'childCheckbox', 'trailerCheckbox', 'pLoc', 'incident', 'iType', 'scary', 'desc', 'filename')
+
+
+class ParsedFilesSerializer(ModelSerializer):
+    class Meta:
+        model = ParsedFiles
+        fields = ('fileName', 'fileType', 'importTimestamp')
+
