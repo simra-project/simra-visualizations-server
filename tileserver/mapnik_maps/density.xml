@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:3857">
+    <Style name="cities" filter-mode="first">
+        <Rule>
+		<Filter>[fileIdSet].match('\[(\"VM2_\-?\d+\",?){1,99}\]')</Filter>
+		<LineSymbolizer stroke="hsl(189.899799599, 71%, 53%)" stroke-width="1.5"/>
+	</Rule>
+        <Rule>
+		<Filter>[fileIdSet].match('\[(\"VM2_\-?\d+\",?){100,199}\]')</Filter>
+		<LineSymbolizer stroke="hsl(199.919839679, 71%, 53%)" stroke-width="3.51246118"/>
+	</Rule>
+        <Rule>
+		<Filter>[fileIdSet].match('\[(\"VM2_\-?\d+\",?){200,299}\]')</Filter>
+		<LineSymbolizer stroke="hsl(209.93987976, 71%, 53%)" stroke-width="4.346049894"/>
+	</Rule>
+        <Rule>
+		<Filter>[fileIdSet].match('\[(\"VM2_\-?\d+\",?){300,399}\]')</Filter>
+		<LineSymbolizer stroke="hsl(219.95991984, 71%, 53%)" stroke-width="4.985685012"/>
+	</Rule>
+	<Rule>
+		<Filter>[fileIdSet].match('\[(\"VM2_\-?\d+\",?){400,499}\]')</Filter>
+		<LineSymbolizer stroke="hsl(229.97995992, 71%, 53%)" stroke-width="5.524922359"/>
+	</Rule>
+	<Rule>
+		<Filter>[fileIdSet].match('\[(\"VM2_\-?\d+\",?){500,}\]')</Filter>
+		<LineSymbolizer stroke="hsl(240, 71%, 53%)" stroke-width="6"/>
+	</Rule>
+    </Style>
+    <Layer name="cities" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>cities</StyleName>
+        <Datasource>
+		<Parameter name="file">/var/simra/playground/legs_berlin_full.real.geojson</Parameter>
+            <Parameter name="type">geojson</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

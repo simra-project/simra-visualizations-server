@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:3857">
+  <Style name="ride">
+    <Rule>
+      <LineSymbolizer stroke="#3279dc"/>
+    </Rule>
+  </Style>
+  <Style name="incident">
+    <Rule>
+      <PointSymbolizer />
+    </Rule>
+  </Style>
+  <Layer name="rides" srs="+proj=latlong">
+    <StyleName>ride</StyleName>
+    <Datasource>
+      <Parameter name="type">postgis</Parameter>
+      <Parameter name="host">localhost</Parameter>
+      <Parameter name="dbname">simra</Parameter>
+      <Parameter name="user">simra</Parameter>
+      <Parameter name="password">simra12345simra</Parameter>
+      <Parameter name="table">public."SimRaAPI_ride"</Parameter>
+    </Datasource>
+  </Layer>
+  <Layer name="incidents" srs="+proj=latlong">
+    <StyleName>incident</StyleName>
+    <Datasource>
+      <Parameter name="type">postgis</Parameter>
+      <Parameter name="host">localhost</Parameter>
+      <Parameter name="dbname">simra</Parameter>
+      <Parameter name="user">simra</Parameter>
+      <Parameter name="password">simra12345simra</Parameter>
+      <Parameter name="table">public."SimRaAPI_incident"</Parameter>
+    </Datasource>
+  </Layer>
+</Map>

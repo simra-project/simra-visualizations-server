@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:3857">
+    <Style name="cities" filter-mode="first">
+        <Rule>
+                <Filter>[incidentCount] &lt;= 1.05</Filter>
+		<LineSymbolizer stroke="#84ca50" stroke-width="4"/>
+	</Rule>
+        <Rule>
+                <Filter>[incidentCount] &gt; 1.05 and [incidentCount] &lt;= 2.45</Filter>
+		<LineSymbolizer stroke="#ede202" stroke-width="4"/>
+	</Rule>
+        <Rule>
+                <Filter>[incidentCount] &gt; 2.45 and [incidentCount] &lt;= 4.2</Filter>
+		<LineSymbolizer stroke="#f07d02" stroke-width="4"/>
+	</Rule>
+        <Rule>
+                <Filter>[incidentCount] &gt; 4.2 and [incidentCount] &lt;= 5.95</Filter>
+		<LineSymbolizer stroke="#e60000" stroke-width="4"/>
+	</Rule>
+        <Rule>
+                <Filter>[incidentCount] &gt; 5.95</Filter>
+		<LineSymbolizer stroke="#9e1313" stroke-width="4"/>
+	</Rule>
+    </Style>
+    <Layer name="cities" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>cities</StyleName>
+        <Datasource>
+		<Parameter name="file">/var/simra/legs_berlin_full.real.geojson</Parameter>
+            <Parameter name="type">geojson</Parameter>
+        </Datasource>
+    </Layer>
+</Map>
