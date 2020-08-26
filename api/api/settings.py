@@ -86,6 +86,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'simra',
         'USER': 'simra',
+        'PASSWORD': 'simra12345simra',
         'HOST': '127.0.0.1',
         'PORT': '5432'
     }

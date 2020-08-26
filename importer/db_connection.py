@@ -5,7 +5,7 @@ from settings import *
 
 class DatabaseConnection(object):
     def __enter__(self):
-        self.conn = psycopg2.connect(f"dbname='{DB_NAME}' user='{DB_USER}' host='{DB_HOST}' port='{DB_PORT}'")
+        self.conn = psycopg2.connect(f"dbname='{DB_NAME}' user='{DB_USER}' password='{DB_PASSWORD}' host='{DB_HOST}' port='{DB_PORT}'")
         register(self.conn)
         self.cur = self.conn.cursor()
 
