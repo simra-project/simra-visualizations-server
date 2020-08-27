@@ -12,9 +12,10 @@ def apply_smoothing_filters(ride):
 def apply_removal_filters(ride):
     ride_distance = calc_dist(ride.raw_coords)
     ride_duration = (ride.timestamps[-1] - ride.timestamps[0]).seconds
-    return apply_short_distance_filter(ride_distance) | apply_short_duration_filter(
-        ride_duration) | apply_high_avg_speed_filter(ride_distance, ride_duration) | apply_user_forgot_to_stop_filter(
-        ride)
+    return apply_short_distance_filter(ride_distance) | \
+           apply_short_duration_filter(ride_duration) | \
+           apply_high_avg_speed_filter(ride_distance, ride_duration) | \
+           apply_user_forgot_to_stop_filter(ride)
 
 
 def apply_acc_filter(ride):
@@ -79,6 +80,7 @@ def apply_user_forgot_to_stop_filter(ride):
         else:
             break
         if dist < MIN_DISTANCE_TO_COVER_IN_5_MIN:
+            print("Ride filtered due to user forgot to stop recording (user only covered {}m in ~5min).".format(dist))
             return True
     return False
 
