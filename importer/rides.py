@@ -4,6 +4,8 @@ from postgis import LineString
 from datetime import datetime
 from db_connection import DatabaseConnection
 import filters
+import map_match_service
+import leg_service
 
 
 def handle_ride_file(filename, cur):
@@ -33,7 +35,11 @@ def handle_ride(data, filename, cur):
     for row in data:
         if row["lat"]:
             raw_coords.append([float(row["lon"]), float(row["lat"])])
-            accuracies.append(float(row["acc"]))
+            try:
+                if row["acc"]:
+                    accuracies.append(float(row["acc"]))
+            except KeyError:
+                return
             timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))  # timeStamp is in Java TS Format
     ride = Ride(raw_coords, accuracies, timestamps)
 
@@ -45,16 +51,23 @@ def handle_ride(data, filename, cur):
     if filters.apply_removal_filters(ride):
         return
 
-    ls = LineString(ride, srid=4326)
+    map_matched = map_match_service.map_match(ride)
+
+    legs = leg_service.determine_legs(map_matched, cur)
+    leg_service.update_legs(ride, legs, cur)
+
+
+
+    ls = LineString(ride.raw_coords, srid=4326)
     filename = filename.split("/")[-1]
 
     try:
         cur.execute("""
-            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, filename) VALUES (%s, %s, %s)
-        """, [ls, timestamps, filename])
+            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename) VALUES (%s, %s, %s, %s)
+        """, [ls, timestamps, [i[0] for i in legs], filename])
     except:
         print(f"Problem parsing {filename}")
-        raise Exception("Can't parse ride!")
+        raise Exception("Can not parse ride!")
 
 
 if __name__ == '__main__':
