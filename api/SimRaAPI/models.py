@@ -26,5 +26,5 @@ class Incident(models.Model):
 class Ride(models.Model):
     timestamps = ArrayField(models.DateTimeField())
     filename = models.CharField(max_length=32)
-
     geom = models.LineStringField()
+    legs = ArrayField(models.BigIntegerField(), default=list)
