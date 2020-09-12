@@ -1,8 +1,9 @@
 import incidents
 import csv
 from postgis import LineString
-from datetime import date
+from datetime import datetime
 from db_connection import DatabaseConnection
+import filters
 
 
 def handle_ride_file(filename, cur):
@@ -25,15 +26,23 @@ def handle_ride_file(filename, cur):
 def handle_ride(data, filename, cur):
     data = csv.DictReader(data[1:], delimiter=",")
 
-    ride = []
+    raw_coords = []
+    accuracies = []
     timestamps = []
 
     for row in data:
         if row["lat"]:
-            ride.append([row["lon"], row["lat"]])
-            timestamps.append(date.fromtimestamp(int(row["timeStamp"]) / 1000))     # timeStamp is in Java TS Format
+            raw_coords.append([float(row["lon"]), float(row["lat"])])
+            accuracies.append(float(row["acc"]))
+            timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))  # timeStamp is in Java TS Format
+    ride = Ride(raw_coords, accuracies, timestamps)
 
-    if len(ride) == 0:
+    if len(ride.raw_coords) == 0:
+        return
+
+    ride = filters.apply_smoothing_filters(ride)
+
+    if filters.apply_removal_filters(ride):
         return
 
     ls = LineString(ride, srid=4326)
@@ -52,3 +61,10 @@ if __name__ == '__main__':
     filepath = "../csvdata/Berlin/Rides/VM2_-351907452"
     with DatabaseConnection() as cur:
         handle_ride_file(filepath, cur)
+
+
+class Ride:
+    def __init__(self, raw_coords, accuracies, timestamps):
+        self.raw_coords = raw_coords
+        self.accuracies = accuracies
+        self.timestamps = timestamps
