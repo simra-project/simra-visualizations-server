@@ -28,3 +28,26 @@ class Ride(models.Model):
     filename = models.CharField(max_length=32)
     geom = models.LineStringField()
     legs = ArrayField(models.BigIntegerField(), default=list)
+
+
+class OsmWaysJunctions(models.Model):
+    point = models.PointField()
+
+
+class OsmWaysLegs(models.Model):
+    osmId = models.BigIntegerField()
+    geom = models.GeometryField()
+    streetName = models.TextField()
+    postalCode = models.TextField()
+    highwayName = models.TextField()
+    count = models.IntegerField(default=0)
+    score = models.FloatField(default=0)
+    weekdayCount = models.IntegerField(default=0)
+    rushhourCount = models.IntegerField(default=0)
+
+
+class OsmLargeJunctions(models.Model):
+    point = models.PointField(spatial_index=True)
+    count = models.IntegerField(default=0)
+    totalDuration = models.BigIntegerField(default=0)
+
