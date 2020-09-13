@@ -6,7 +6,7 @@ from db_connection import DatabaseConnection
 import filters
 import map_match_service
 import leg_service
-
+import stop_service
 
 def handle_ride_file(filename, cur):
     with open(filename, 'r') as f:
@@ -56,7 +56,7 @@ def handle_ride(data, filename, cur):
     legs = leg_service.determine_legs(map_matched, cur)
     leg_service.update_legs(ride, legs, cur)
 
-
+    stop_service.process_stops(ride, cur)
 
     ls = LineString(ride.raw_coords, srid=4326)
     filename = filename.split("/")[-1]
@@ -79,5 +79,7 @@ if __name__ == '__main__':
 class Ride:
     def __init__(self, raw_coords, accuracies, timestamps):
         self.raw_coords = raw_coords
+        self.raw_coords_filtered = None
         self.accuracies = accuracies
         self.timestamps = timestamps
+        self.timestamps_filtered = None
