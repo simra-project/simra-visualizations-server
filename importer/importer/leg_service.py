@@ -17,9 +17,9 @@ def insert_map_matched_coords(map_matched_coords, cur):
 
     for coord in map_matched_coords:
         insert_map_matched_query += 'St_SetSRID(st_makepoint(' + str(coord[0]) + ',' + str(coord[1]) + '), 4326),'
-    insert_map_matched_query = insert_map_matched_query[:-1]
-    insert_map_matched_query += ']), ' + str(POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE) + '));'
-
+    if len(map_matched_coords) > 0:
+        insert_map_matched_query = insert_map_matched_query[:-1]
+    insert_map_matched_query += ']::geometry[]), ' + str(POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE) + '));'
     cur.execute(insert_map_matched_query)
 
 
@@ -27,26 +27,26 @@ def find_legs(cur):
     query = '''
         SELECT 
            sub.id,
-           sub.osm_id,
+           sub."osmId",
            st_astext(st_transform(sub.geomerty_rounded, 4326)),
-           street_name,
+           "streetName",
            count,
            score,
-           weekday_count,
-           rushhour_count
+           "weekdayCount",
+           "rushhourCount"
         FROM (
              SELECT
                     l.id,
-                    l.osm_id,
-                    st_transform(l.geometry_rounded, 4326) as geomerty_rounded,
-                    street_name,
+                    l."osmId",
+                    st_transform(l.geom, 4326) as geomerty_rounded,
+                    "streetName",
                     count,
                     score,
-                    weekday_count,
-                    rushhour_count
+                    "weekdayCount",
+                    "rushhourCount"
              FROM ride r,
-                  osm_ways_legs l
-             WHERE r.geometry && l.geometry_rounded
+                  public."SimRaAPI_osmwayslegs" l
+             WHERE r.geometry && l.geom
              LIMIT 100000) AS sub, ride r
         WHERE st_intersects(r.geometry, st_startpoint(sub.geomerty_rounded))
           AND st_intersects(st_endpoint(sub.geomerty_rounded), r.geometry);
@@ -79,14 +79,14 @@ def update_legs(ride, legs, cur):
       VALUES(%s, %s, %s, %s, %s)""",
                     tuples)
     cur.execute("""
-            UPDATE osm_ways_legs
+            UPDATE public."SimRaAPI_osmwayslegs"
             SET 
                 count = updated_legs.count,
                 score = updated_legs.score,
-                weekday_count = updated_legs.weekday_count,
-                rushhour_count = updated_legs.rushhour_count
+                "weekdayCount" = updated_legs.weekday_count,
+                "rushhourCount" = updated_legs.rushhour_count
             FROM updated_legs
-            WHERE updated_legs.id = osm_ways_legs.id;
+            WHERE updated_legs.id = public."SimRaAPI_osmwayslegs".id;
             """)
 
 

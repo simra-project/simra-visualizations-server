@@ -36,5 +36,4 @@ def query_map_match_server(gpx_xml):
         for segment in track.segments:
             for point in segment.points:
                 map_matched.append([point.longitude, point.latitude])
-
     return map_matched

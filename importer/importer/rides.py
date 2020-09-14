@@ -47,7 +47,6 @@ def handle_ride(data, filename, cur):
         return
 
     ride = filters.apply_smoothing_filters(ride)
-
     if filters.apply_removal_filters(ride):
         return
 

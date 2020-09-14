@@ -8,7 +8,7 @@ import profile, rides
 
 if __name__ == '__main__':
     files = []
-    for r, d, f in os.walk(IMPORT_DIRECTORY):
+    for r, d, f in os.walk(IMPORT_DIRECTORY, followlinks=True):
         for file in f:
             if '.' not in file:
                 files.append(os.path.join(r, file))
@@ -28,7 +28,9 @@ if __name__ == '__main__':
                 profile.handle_profile(file, cur)
                 continue
             else:
+                print(file)
                 rides.handle_ride_file(file, cur)
+
             cur.execute("""
                 INSERT INTO public."SimRaAPI_parsedfiles" ("fileName", "fileType", "importTimestamp") VALUES (%s, %s, %s)
             """, [filename, "profile" if "Profiles" in file else "ride", datetime.datetime.utcnow()])
