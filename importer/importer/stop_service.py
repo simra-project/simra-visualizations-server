@@ -43,12 +43,12 @@ def match_junction_to_stop(stop, cur):
         SELECT 
             j.id,
             j.count,
-            j.cum_duration,
+            j."totalDuration",
             ST_Distance(
                    j.point,
                    st_setsrid(st_makepoint({0}, {1}), 4326)
                ) * 111000 AS distance_in_meters
-        FROM osm_large_junctions j
+        FROM public."SimRaAPI_osmlargejunctions" j
         ORDER BY point <->
             st_setsrid(st_makepoint({0}, {1}), 4326)
         LIMIT 1;
@@ -61,10 +61,10 @@ def update_junction(junction, stop, cur):
     count = junction[1] + 1
     cum_duration = junction[2] + stop.duration.seconds
     query = """
-            UPDATE osm_large_junctions
+            UPDATE public."SimRaAPI_osmlargejunctions"
             SET 
                 count = {0},
-                cum_duration = {1}
+                "totalDuration" = {1}
             WHERE id = {2};
     """.format(count, cum_duration, junction[0])
     cur.execute(query)

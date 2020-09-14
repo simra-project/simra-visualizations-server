@@ -22,15 +22,17 @@ if __name__ == '__main__':
             """, (f'%{filename}%', ))
             if cur.fetchone() is not None:
                 continue
+        try:
+            with DatabaseConnection() as cur:   # new database connection for the whole transaction
+                if "Profiles" in file:
+                    profile.handle_profile(file, cur)
+                    continue
+                else:
+                    print(file)
+                    rides.handle_ride_file(file, cur)
 
-        with DatabaseConnection() as cur:   # new database connection for the whole transaction
-            if "Profiles" in file:
-                profile.handle_profile(file, cur)
-                continue
-            else:
-                print(file)
-                rides.handle_ride_file(file, cur)
-
-            cur.execute("""
-                INSERT INTO public."SimRaAPI_parsedfiles" ("fileName", "fileType", "importTimestamp") VALUES (%s, %s, %s)
-            """, [filename, "profile" if "Profiles" in file else "ride", datetime.datetime.utcnow()])
+                cur.execute("""
+                    INSERT INTO public."SimRaAPI_parsedfiles" ("fileName", "fileType", "importTimestamp") VALUES (%s, %s, %s)
+                """, [filename, "profile" if "Profiles" in file else "ride", datetime.datetime.utcnow()])
+        except Exception as e:
+            print(f"Skipped ride {filename} due to exception {e}")
