@@ -21,24 +21,23 @@ def apply_removal_filters(ride):
 def apply_acc_filter(ride):
     len_before = len(ride.raw_coords)
     mask = [acc > MIN_ACCURACY for acc in ride.accuracies]
-    ride = filter_by_mask(ride, mask)
+    ride.raw_coords_filtered = filter_by_mask(ride.raw_coords, mask)
+    ride.timestamps_filtered = filter_by_mask(ride.timestamps, mask)
     print("Accuracy filter filtered {} coordinates.".format(len_before - len(ride.raw_coords_filtered)))
     return ride
 
 
 def apply_rdp_filter(ride):
-    len_before = len(ride.raw_coords)
+    len_before = len(ride.raw_coords_filtered)
     mask = rdp(ride.raw_coords, RDP_EPSILON, return_mask=True)
-    ride = filter_by_mask(ride, [not boolean for boolean in mask])
+    ride.raw_coords_filtered = filter_by_mask(ride.raw_coords_filtered, [not boolean for boolean in mask])
+    ride.timestamps_filtered = filter_by_mask(ride.timestamps_filtered, [not boolean for boolean in mask])
     print("RDP filter filtered {} coordinates.".format(len_before - len(ride.raw_coords_filtered)))
     return ride
 
 
-def filter_by_mask(ride, mask):
-    ride.raw_coords_filtered = [coord for (coord, remove) in zip(ride.raw_coords, mask) if not remove]
-    ride.accuracies = [acc for (acc, remove) in zip(ride.accuracies, mask) if not remove]
-    ride.timestamps_filtered = [ts for (ts, remove) in zip(ride.timestamps, mask) if not remove]
-    return ride
+def filter_by_mask(array, mask):
+    return [i for (i, remove) in zip(array, mask) if not remove]
 
 
 def apply_short_distance_filter(dist):
