@@ -10,7 +10,7 @@ def apply_smoothing_filters(ride):
 
 
 def apply_removal_filters(ride):
-    ride_distance = calc_dist(ride.raw_coords)
+    ride_distance = calc_dist(ride.raw_coords_filtered)
     ride_duration = (ride.timestamps[-1] - ride.timestamps[0]).seconds
     return apply_short_distance_filter(ride_distance) | \
            apply_short_duration_filter(ride_duration) | \
@@ -29,7 +29,7 @@ def apply_acc_filter(ride):
 
 def apply_rdp_filter(ride):
     len_before = len(ride.raw_coords_filtered)
-    mask = rdp(ride.raw_coords, RDP_EPSILON, return_mask=True)
+    mask = rdp(ride.raw_coords_filtered, RDP_EPSILON, return_mask=True)
     ride.raw_coords_filtered = filter_by_mask(ride.raw_coords_filtered, [not boolean for boolean in mask])
     ride.timestamps_filtered = filter_by_mask(ride.timestamps_filtered, [not boolean for boolean in mask])
     print("RDP filter filtered {} coordinates.".format(len_before - len(ride.raw_coords_filtered)))

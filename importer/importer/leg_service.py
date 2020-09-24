@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE = 0.0001
+POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE = 0.00002
 
 
 def determine_legs(map_matched_coords, cur):
@@ -28,7 +28,7 @@ def find_legs(cur):
         SELECT 
            sub.id,
            sub."osmId",
-           st_astext(st_transform(sub.geomerty_rounded, 4326)),
+           st_astext(st_transform(sub.geom, 4326)),
            "streetName",
            count,
            score,
@@ -38,7 +38,7 @@ def find_legs(cur):
              SELECT
                     l.id,
                     l."osmId",
-                    st_transform(l.geom, 4326) as geomerty_rounded,
+                    st_transform(l.geom, 4326) as geom,
                     "streetName",
                     count,
                     score,
@@ -48,8 +48,7 @@ def find_legs(cur):
                   public."SimRaAPI_osmwayslegs" l
              WHERE r.geometry && l.geom
              LIMIT 100000) AS sub, ride r
-        WHERE st_intersects(r.geometry, st_startpoint(sub.geomerty_rounded))
-          AND st_intersects(st_endpoint(sub.geomerty_rounded), r.geometry);
+        WHERE st_contains(r.geometry, sub.geom);
     '''
     cur.execute(query)
     return cur.fetchall()

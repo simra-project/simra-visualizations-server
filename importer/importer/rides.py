@@ -57,7 +57,7 @@ def handle_ride(data, filename, cur):
 
     stop_service.process_stops(ride, cur)
 
-    ls = LineString(ride.raw_coords, srid=4326)
+    ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
 
     try:
