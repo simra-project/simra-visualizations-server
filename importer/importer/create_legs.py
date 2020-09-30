@@ -57,7 +57,7 @@ if __name__ == '__main__':
         cur.execute("""
 INSERT INTO public."SimRaAPI_osmlargejunctions" (point)
     SELECT st_transform((ST_DumpPoints(geometry)).geom, 4326) AS point
-    FROM import.osm_ways
+    FROM public."SimRaAPI_osmwayslegs"
     WHERE highway_type = 'primary'
        OR highway_type = 'secondary'
        OR highway_type = 'secondary_link'
@@ -67,7 +67,7 @@ INSERT INTO public."SimRaAPI_osmlargejunctions" (point)
        OR highway_type = 'residential'
        OR highway_type = 'cycleway'
     GROUP BY point
-    HAVING count(*) >= 2
+    HAVING count(*) >= 3
 
                 """)
 
