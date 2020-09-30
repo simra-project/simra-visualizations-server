@@ -51,6 +51,7 @@ if __name__ == '__main__':
         cur.execute("""
                 ALTER TABLE public."SimRaAPI_osmlargejunctions" ALTER count SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmlargejunctions" ALTER "totalDuration" SET DEFAULT 0;
+                ALTER TABLE public."SimRaAPI_osmlargejunctions" ALTER "avgDuration" SET DEFAULT 0;
                 """)
 
         cur.execute("""
