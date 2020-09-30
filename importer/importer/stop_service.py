@@ -60,13 +60,15 @@ def match_junction_to_stop(stop, cur):
 def update_junction(junction, stop, cur):
     count = junction[1] + 1
     cum_duration = junction[2] + stop.duration.seconds
+    avg_duration = cum_duration / count
     query = """
             UPDATE public."SimRaAPI_osmlargejunctions"
             SET 
                 count = {0},
-                "totalDuration" = {1}
-            WHERE id = {2};
-    """.format(count, cum_duration, junction[0])
+                "totalDuration" = {1}, 
+                "avgDuration" = {2}
+            WHERE id = {3};
+    """.format(count, cum_duration, avg_duration, junction[0])
     cur.execute(query)
 
 
