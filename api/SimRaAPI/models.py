@@ -50,4 +50,5 @@ class OsmLargeJunctions(models.Model):
     point = models.PointField(spatial_index=True)
     count = models.IntegerField(default=0)
     totalDuration = models.BigIntegerField(default=0)
+    avgDuration = models.FloatField(default=0)
 
