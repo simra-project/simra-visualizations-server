@@ -42,6 +42,7 @@ class OsmWaysLegs(models.Model):
     highwayName = models.TextField()
     count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
+    score_array = ArrayField(models.FloatField(), default=list)
     weekdayCount = models.IntegerField(default=0)
     rushhourCount = models.IntegerField(default=0)
 
