@@ -33,7 +33,8 @@ def find_legs(cur):
            count,
            score,
            "weekdayCount",
-           "rushhourCount"
+           "rushhourCount",
+           "score_array"
         FROM (
              SELECT
                     l.id,
@@ -43,7 +44,8 @@ def find_legs(cur):
                     count,
                     score,
                     "weekdayCount",
-                    "rushhourCount"
+                    "rushhourCount",
+                    "score_array"
              FROM ride r,
                   public."SimRaAPI_osmwayslegs" l
              WHERE r.geometry && l.geom
@@ -54,36 +56,62 @@ def find_legs(cur):
     return cur.fetchall()
 
 
-def update_legs(ride, legs, cur):
+def update_legs(ride, legs, cur, IRI):
     df = pd.DataFrame(data=legs, index=range(len(legs)),
                       columns=['id', 'osm_id', 'geometry', 'street_name', 'count', 'score', 'weekday_count',
-                               'rushhour_count'])
+                               'rushhour_count', "score_array"])
     df['count'] += 1
     for i, leg in df.iterrows():
-        # todo calc road score here
-        df.at[i, 'score'] = random.uniform(0, 1)
         if is_weekday(ride.timestamps):
             df.at[i, 'weekday_count'] += 1
         if is_rushhour(ride.timestamps):
             df.at[i, 'rushhour_count'] += 1
 
-    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'rushhour_count', 'id']].to_numpy()]
 
     cur.execute("""
-        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, rushhour_count INT, id BIGINT) ON COMMIT DROP
+        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, rushhour_count INT, id BIGINT, score_array FLOAT[]) ON COMMIT DROP
         """)
 
+    cur.execute("""
+                CREATE TEMP TABLE legs_to_match(id BIGINT, geom GEOMETRY(LINESTRING,4326)) ON COMMIT DROP
+                """)
+    tup = [tuple(x) for x in df[['id', 'geometry']].to_numpy()]
     cur.executemany("""
-      INSERT INTO updated_legs (count, score, weekday_count, rushhour_count, id)
-      VALUES(%s, %s, %s, %s, %s)""",
+                    INSERT INTO legs_to_match (id, geom) VALUES(%s, ST_GeomFromText(%s,4326))
+                    """, tup)
+
+    from tqdm import tqdm
+    for iri in tqdm(IRI):
+        cur.execute("""
+                        SELECT id, ST_Distance(geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
+                    """, (iri[2][0], iri[2][1]))
+        candidates = cur.fetchall()
+        for candidate in candidates:
+            if candidate[0] in list(df["id"]):
+                for i in df.loc[df['id'] == candidate[0]]["score_array"]:
+                    i.append(iri[0])
+                break
+
+    for i, leg in df.iterrows():
+        if df.at[i, 'score_array']:
+            df.at[i, 'score'] = sum(df.at[i, "score_array"]) / len(df.at[i, "score_array"])
+        else:
+            df.at[i, "score"] = -1
+    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'rushhour_count', 'id', 'score_array']].to_numpy()]
+
+    cur.executemany("""
+      INSERT INTO updated_legs (count, score, weekday_count, rushhour_count, id, score_array)
+      VALUES(%s, %s, %s, %s, %s, %s)""",
                     tuples)
+
     cur.execute("""
             UPDATE public."SimRaAPI_osmwayslegs"
             SET 
                 count = updated_legs.count,
                 score = updated_legs.score,
                 "weekdayCount" = updated_legs.weekday_count,
-                "rushhourCount" = updated_legs.rushhour_count
+                "rushhourCount" = updated_legs.rushhour_count,
+                "score_array" = updated_legs.score_array
             FROM updated_legs
             WHERE updated_legs.id = public."SimRaAPI_osmwayslegs".id;
             """)
