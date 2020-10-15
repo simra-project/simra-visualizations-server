@@ -28,15 +28,13 @@ def process_stops(ride, legs, cur):
     all_ride_junctions = find_junctions(legs, cur)
     raw_stops = find_stops_in_raw_coords(ride)
     stops = find_junctions_of_stops(raw_stops, cur)
-    no_stop_junctions = [jnc for jnc in all_ride_junctions if jnc[0] not in [stop.junction[0] for stop in stops]]
+    no_stop_junctions = [jnc for jnc in all_ride_junctions if jnc[0] not in [stop.junction[0] for stop in stops]]  # junctions, where cyclist did not stop
     for jnc in no_stop_junctions:
         update_junction(jnc, 0, cur)
     for stop in stops:
         if stop.junction is None:
             continue
         update_junction(stop.junction, stop.duration.seconds, cur)
-
-    a = 12
 
 def find_stops_in_raw_coords(ride):
     stops = []
@@ -65,6 +63,7 @@ def find_junctions_of_stops(stops, cur):
         if junction[3] > DISTANCE_TO_JUNCTION_THRESHOLD:  # stop is ignored as cyclist did not stop at a junction but somewhere on the way
             continue
         stop.junction = junction
+    stops = [stop for stop in stops if stop.junction is not None]
     return stops
 
 
