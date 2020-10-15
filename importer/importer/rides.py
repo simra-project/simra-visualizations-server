@@ -1,6 +1,6 @@
 import incidents
 import csv
-from postgis import LineString
+from postgis import LineString, Point
 from datetime import datetime, timedelta
 from db_connection import DatabaseConnection
 import filters
@@ -102,10 +102,13 @@ def handle_ride(data, filename, cur):
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
 
+    start = Point(ride.raw_coords_filtered[0], srid=4326)
+    end = Point(ride.raw_coords_filtered[-1], srid=4326)
+
     try:
         cur.execute("""
-            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename) VALUES (%s, %s, %s, %s)
-        """, [ls, timestamps, [i[0] for i in legs], filename])
+            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s)
+        """, [ls, timestamps, [i[0] for i in legs], filename, start, end])
     except:
         print(f"Problem parsing {filename}")
         raise Exception("Can not parse ride!")

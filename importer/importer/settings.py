@@ -1,4 +1,4 @@
-IMPORT_DIRECTORY = "../csvdata/EichwaldeNew/"
+IMPORT_DIRECTORY = "../csvdata"
 DB_HOST = "127.0.0.1"
 DB_NAME = "simra"
 DB_USER = "simra"
