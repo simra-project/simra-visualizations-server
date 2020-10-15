@@ -6,8 +6,13 @@
         </Rule>
     </Style>
     <Style name="incident">
-        <Rule>
-            <PointSymbolizer/>
+            <Rule>
+            <Filter>[scary] = true</Filter>
+            <MarkersSymbolizer fill="#e70101" stroke-width="0.0"/>
+        </Rule>
+            <Rule>
+            <Filter>[scary] = false</Filter>
+            <MarkersSymbolizer fill="#000000" stroke-width="0.0"/>
         </Rule>
     </Style>
     <Layer name="rides" srs="+proj=latlong">
@@ -29,7 +34,7 @@
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
-            <Parameter name="table">public."SimRaAPI_incident"</Parameter>
+            <Parameter name="table">(select * from public."SimRaAPI_incident" where incident > 0) t</Parameter>
         </Datasource>
     </Layer>
 </Map>
