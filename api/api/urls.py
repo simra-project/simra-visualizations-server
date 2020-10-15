@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.urls import re_path, include
 from rest_framework import routers
-from SimRaAPI.views import RideViewSet, IncidentViewSet, ParsedFilesViewSet
+from SimRaAPI.views import RideViewSet, IncidentViewSet, ParsedFilesViewSet, LegViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'rides', RideViewSet)
 router.register(r'incidents', IncidentViewSet)
 router.register(r'files', ParsedFilesViewSet)
+router.register(r'legs', LegViewSet)
 
 urlpatterns = [
     re_path(r'^api/', include(router.urls))

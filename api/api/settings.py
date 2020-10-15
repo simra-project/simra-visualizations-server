@@ -88,7 +88,8 @@ DATABASES = {
         'USER': 'simra',
         'PASSWORD': 'simra12345simra',
         'HOST': '127.0.0.1',
-        'PORT': '5432'
+        'PORT': '5432',
+        'COMMAND_TIMEOUT': 600
     }
 }
 

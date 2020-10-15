@@ -1,6 +1,6 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework.serializers import ModelSerializer
-from .models import Ride, Incident, ParsedFiles
+from .models import Ride, Incident, ParsedFiles, OsmWaysLegs
 
 
 class RideSerializer(GeoFeatureModelSerializer):
@@ -22,3 +22,9 @@ class ParsedFilesSerializer(ModelSerializer):
         model = ParsedFiles
         fields = ('fileName', 'fileType', 'importTimestamp')
 
+
+class LegSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = OsmWaysLegs
+        geo_field = 'geom'
+        fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'rushhourCount')
