@@ -27,6 +27,8 @@ class Ride(models.Model):
     timestamps = ArrayField(models.DateTimeField())
     filename = models.CharField(max_length=32)
     geom = models.LineStringField()
+    start = models.PointField(null=True)
+    end = models.PointField(null=True)
     legs = ArrayField(models.BigIntegerField(), default=list)
 
 
