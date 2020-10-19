@@ -16,7 +16,7 @@
             <Parameter name="table">(
                 select
                     *,
-                    concat('hsl(', ROUND((1 - LEAST(score / 2.0, 1)) * 120.0), ' , 69%, 50%)') as color
+                    concat('hsl(', ROUND((1 - LEAST(score / 0.25, 1)) * 120.0), ' , 69%, 50%)') as color
                 from public."SimRaAPI_osmwayslegs"
                 where score > 0
             ) t</Parameter>
