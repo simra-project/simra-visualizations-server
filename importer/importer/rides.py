@@ -7,6 +7,7 @@ import filters
 import map_match_service
 import leg_service
 import stop_service
+import velocity_service
 
 def handle_ride_file(filename, cur):
     with open(filename, 'r') as f:
@@ -56,6 +57,8 @@ def handle_ride(data, filename, cur):
     leg_service.update_legs(ride, legs, cur)
 
     stop_service.process_stops(ride, legs, cur)
+    velocity_service.process_velocity(ride, cur)
+
 
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
