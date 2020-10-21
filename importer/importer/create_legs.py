@@ -23,6 +23,7 @@ if __name__ == '__main__':
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER score SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "weekdayCount" SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "rushhourCount" SET DEFAULT 0;
+                ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "score_array" SET DEFAULT array[]::float[];
                 """)
         cur.execute("""
         INSERT INTO public."SimRaAPI_osmwayslegs" ("osmId", "geom", "streetName", "postalCode", "highwayName")

@@ -7,7 +7,7 @@ class RideSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Ride
         geo_field = 'geom'
-        fields = ('timestamps', 'filename')
+        fields = ('filename',)
 
 
 class IncidentSerializer(GeoFeatureModelSerializer):

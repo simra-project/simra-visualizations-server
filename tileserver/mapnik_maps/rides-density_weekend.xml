@@ -16,10 +16,10 @@
             <Parameter name="table">(
                 select
                     *,
-                    concat('hsl(', ROUND((240 - (1 - ("weekdayCount"  / 500.0)) * 50.0)), ', 71%, 53%)') as color,
-                    sqrt("weekdayCount"  / 500.0) * 4.5 + 1.5 as width
+                    concat('hsl(', ROUND((240 - (1 - (("count" - "weekdayCount") / 500.0)) * 50.0)), ', 71%, 53%)') as color,
+                    sqrt(("count" - "weekdayCount") / 500.0) * 4.5 + 1.5 as width
                 from public."SimRaAPI_osmwayslegs"
-                where "weekdayCount"  > 0
+                where ("count" - "weekdayCount") > 0
             ) t</Parameter>
         </Datasource>
     </Layer>

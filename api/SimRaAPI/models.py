@@ -27,6 +27,8 @@ class Ride(models.Model):
     timestamps = ArrayField(models.DateTimeField())
     filename = models.CharField(max_length=32)
     geom = models.LineStringField()
+    start = models.PointField(null=True)
+    end = models.PointField(null=True)
     legs = ArrayField(models.BigIntegerField(), default=list)
 
 
@@ -42,6 +44,7 @@ class OsmWaysLegs(models.Model):
     highwayName = models.TextField()
     count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
+    score_array = ArrayField(models.FloatField(), default=list)
     weekdayCount = models.IntegerField(default=0)
     rushhourCount = models.IntegerField(default=0)
 
