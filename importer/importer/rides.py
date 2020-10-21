@@ -55,7 +55,7 @@ def handle_ride(data, filename, cur):
     legs = leg_service.determine_legs(map_matched, cur)
     leg_service.update_legs(ride, legs, cur)
 
-    stop_service.process_stops(ride, cur)
+    stop_service.process_stops(ride, legs, cur)
 
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
