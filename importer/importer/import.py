@@ -35,4 +35,5 @@ if __name__ == '__main__':
                     INSERT INTO public."SimRaAPI_parsedfiles" ("fileName", "fileType", "importTimestamp") VALUES (%s, %s, %s)
                 """, [filename, "profile" if "Profiles" in file else "ride", datetime.datetime.utcnow()])
         except Exception as e:
+            raise(e)
             print(f"Skipped ride {filename} due to exception {e}")

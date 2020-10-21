@@ -57,6 +57,8 @@ def apply_short_duration_filter(duration):
 
 
 def apply_high_avg_speed_filter(distance, duration):
+    if duration <= 0:
+        return True
     avg_speed = (distance / duration) * 3.6
     if avg_speed > MAX_RIDE_AVG_SPEED:
         print("Ride filtered due to high average speed ({}km/h).".format(duration))

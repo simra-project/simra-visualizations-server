@@ -56,7 +56,7 @@ def find_legs(cur):
     return cur.fetchall()
 
 
-def update_legs(ride, legs, cur, IRI):
+def update_legs(ride, legs, cur, IRI, phone_loc):
     df = pd.DataFrame(data=legs, index=range(len(legs)),
                       columns=['id', 'osm_id', 'geometry', 'street_name', 'count', 'score', 'weekday_count',
                                'rushhour_count', "score_array"])
@@ -80,25 +80,26 @@ def update_legs(ride, legs, cur, IRI):
                     INSERT INTO legs_to_match (id, geom) VALUES(%s, ST_GeomFromText(%s,4326))
                     """, tup)
 
-    from tqdm import tqdm
-    for iri in tqdm(IRI):
-        cur.execute("""
+    if phone_loc == 1:  # Handlebar
+        from tqdm import tqdm
+        for iri in tqdm(IRI):
+            cur.execute("""
                         SELECT id, ST_Distance(geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
                     """, (iri[2][0], iri[2][1]))
-        candidates = cur.fetchall()
-        for candidate in candidates:
-            if candidate[0] in list(df["id"]):
-                for i in df.loc[df['id'] == candidate[0]]["score_array"]:
-                    i.append(iri[0])
-                break
+            candidates = cur.fetchall()
+            for candidate in candidates:
+                if candidate[0] in list(df["id"]):
+                    for i in df.loc[df['id'] == candidate[0]]["score_array"]:
+                        i.append(iri[0])
+                    break
 
-    for i, leg in df.iterrows():
-        if df.at[i, 'score_array']:
-            df.at[i, 'score'] = sum(df.at[i, "score_array"]) / len(df.at[i, "score_array"])
-        else:
-            df.at[i, "score"] = -1
+        for i, leg in df.iterrows():
+            if len(df.at[i, 'score_array']) > 0:
+                df.at[i, 'score'] = sum(df.at[i, "score_array"]) / len(df.at[i, "score_array"])
+            else:
+                df.at[i, "score"] = -1
+
     tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'rushhour_count', 'id', 'score_array']].to_numpy()]
-
     cur.executemany("""
       INSERT INTO updated_legs (count, score, weekday_count, rushhour_count, id, score_array)
       VALUES(%s, %s, %s, %s, %s, %s)""",

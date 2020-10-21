@@ -22,11 +22,11 @@ def handle_ride_file(filename, cur):
                 incident_list.append(line)
             else:
                 ride.append(line)
-        incidents.handle_incidents(incident_list, filename, cur)
-        handle_ride(ride, filename, cur)
+        phone_loc = incidents.handle_incidents(incident_list, filename, cur)
+        handle_ride(ride, filename, cur, phone_loc)
 
 
-def handle_ride(data, filename, cur):
+def handle_ride(data, filename, cur, phone_loc):
     data = csv.DictReader(data[1:], delimiter=",")
 
     raw_coords = []
@@ -55,27 +55,32 @@ def handle_ride(data, filename, cur):
 
     A5 = [sum(y) / len(y) for y in zip(*first_five_seconds)]  # get average of accelerations in first 5 seconds of ride
 
-    sliding_window_size = 15  # seconds per direction
-    every_x_seconds = 5
+    sliding_window_size = 5  # seconds per direction
+    every_x_seconds = 2.5
     current_max_idx = 0
     IRI = []
+    ride_sections = []
     in_window = []
-    for i in range(len(accelerations)):
-        current = accelerations[i]
-        ts = current[3]
-        if IRI and (ts - IRI[-1][1]).total_seconds() < every_x_seconds:
-            continue
+    for i in range(len(raw_coords)):
+        current = raw_coords[i]
+        ls = raw_coords[i: i+2]
+        ts = timestamps[i]
         while in_window and ts - in_window[0][3] > timedelta(seconds = sliding_window_size):
             in_window.remove(in_window[0])
         while current_max_idx < len(accelerations) and accelerations[current_max_idx][3] - ts < timedelta(seconds=sliding_window_size):
             A = accelerations[current_max_idx][:-2]
-            avs = (A[0] * A5[0] + A[1] * A5[1] + A[2] * A5[2]) / math.sqrt(A5[0]**2 + A5[1]**2 + A5[2]**2)
+            d = math.sqrt(A5[0]**2 + A5[1]**2 + A5[2]**2)
+            if d == 0:
+                d = 1
+            avs = (A[0] * A5[0] + A[1] * A5[1] + A[2] * A5[2]) / d
             if len(in_window) > 1:
                 dt = (in_window[-1][3] - in_window[-2][3]).total_seconds()
             else:
                 dt = 0.1
             in_window.append(accelerations[current_max_idx] + (abs(avs * dt**2 / 2),))
             current_max_idx += 1
+        if len(in_window) < 2:
+            continue
         lon1, lat1 = in_window[0][4]
         lon2, lat2 = in_window[-1][4]
         Sh = get_distance(in_window[0][4], in_window[-1][4])
@@ -83,7 +88,10 @@ def handle_ride(data, filename, cur):
         true_timedelta = true_timedelta.total_seconds()
         if Sh > 0:
             iri = sum(list(zip(*in_window))[5]) / Sh
-            IRI.append((iri, ts, current[4], Sh))
+            if not (IRI and (ts - IRI[-1][1]).total_seconds() < every_x_seconds):
+                IRI.append((iri, ts, current, Sh))
+            if len(ls) == 2:
+                ride_sections.append((LineString(ls, srid=4326), iri))
 
     if len(ride.raw_coords) == 0:
         return
@@ -91,11 +99,11 @@ def handle_ride(data, filename, cur):
     ride = filters.apply_smoothing_filters(ride)
     if filters.apply_removal_filters(ride):
         return
-
     map_matched = map_match_service.map_match(ride)
-
+    if len(map_matched) == 0:
+        return
     legs = leg_service.determine_legs(map_matched, cur)
-    leg_service.update_legs(ride, legs, cur, IRI)
+    leg_service.update_legs(ride, legs, cur, IRI, phone_loc)
 
     stop_service.process_stops(ride, cur)
 
@@ -104,6 +112,15 @@ def handle_ride(data, filename, cur):
 
     start = Point(ride.raw_coords_filtered[0], srid=4326)
     end = Point(ride.raw_coords_filtered[-1], srid=4326)
+    if phone_loc == 1:  # Handlebar
+        print("Phone is on Handlebar, finding road surface quality")
+        try:
+            cur.executemany("""
+INSERT INTO public."SimRaAPI_ridesegment" (geom, score) VALUES (%s, %s)
+            """, ride_sections)
+        except Exception as e:
+            print("Can't create ride segments.")
+            raise(e)
 
     try:
         cur.execute("""

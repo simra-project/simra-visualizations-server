@@ -7,7 +7,7 @@ from postgis import Point
 def handle_incidents(data, filename, cur):
     data = csv.DictReader(data[1:], delimiter=",")
     filename = filename.split("/")[-1]
-
+    pLoc = -1
     for row in data:
         rideTimestamp = date.fromtimestamp(int(row.get("ts", 0)) / 1000)
         bikeType = row.get("bike", -1)
@@ -31,3 +31,4 @@ def handle_incidents(data, filename, cur):
         cur.execute("""
             INSERT INTO public."SimRaAPI_incident" ("rideTimestamp", "bikeType", "childCheckbox", "trailerCheckbox", "pLoc", "incident", "iType", "scary", "desc", "filename", "geom") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, [rideTimestamp, bikeType, childCheckbox, trailerCheckbox, pLoc, incident, iType, scary, desc, filename, geom])
+    return int(pLoc)

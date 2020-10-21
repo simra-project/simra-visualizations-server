@@ -1,3 +1,4 @@
+# IMPORT_DIRECTORY = "../csvdata/EichwaldeNew/ZES_Experimentell"
 IMPORT_DIRECTORY = "../csvdata"
 DB_HOST = "127.0.0.1"
 DB_NAME = "simra"

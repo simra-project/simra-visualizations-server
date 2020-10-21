@@ -9,14 +9,14 @@ SELECT jsonb_build_object(
     'type', 'Feature',
     'geometry', ST_AsGeoJSON(geom)::jsonb,
     'properties', to_jsonb(row) - 'geom'
-) FROM (SELECT * FROM public."SimRaAPI_osmwayslegs") row;
+) FROM (SELECT * FROM public."SimRaAPI_osmwayslegs" WHERE "count" > 0) row;
         """)
         final_geojson = """
-"type": "FeatureCollection",
+{ "type": "FeatureCollection",
 "features": [
 """
         final_geojson += "\n".join(map(lambda x: str(x[0]), cur.fetchall()))
-        final_geojson += "\n]"
+        final_geojson += "\n]}"
         with open("simra_legs.geojson", "w") as f:
             f.write(final_geojson)
         print("[+] done, saved in simra_legs.geojson")

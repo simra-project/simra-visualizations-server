@@ -32,6 +32,11 @@ class Ride(models.Model):
     legs = ArrayField(models.BigIntegerField(), default=list)
 
 
+class RideSegment(models.Model):
+    geom = models.LineStringField()
+    score = models.FloatField()
+
+
 class OsmWaysJunctions(models.Model):
     point = models.PointField()
 
