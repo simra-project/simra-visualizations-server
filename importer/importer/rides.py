@@ -80,7 +80,7 @@ INSERT INTO public."SimRaAPI_ridesegment" (geom, score) VALUES (%s, %s)
             """, ride_sections)
         except Exception as e:
             print("Can't create ride segments.")
-            raise(e)
+            raise (e)
 
     try:
         cur.execute("""
@@ -89,14 +89,6 @@ INSERT INTO public."SimRaAPI_ridesegment" (geom, score) VALUES (%s, %s)
     except:
         print(f"Problem parsing {filename}")
         raise Exception("Can not parse ride!")
-
-
-def get_distance(p1, p2):
-    lon1, lat1 = p1[0] * math.pi / 180, p1[1] * math.pi / 180
-    lon2, lat2 = p2[0] * math.pi / 180, p2[1] * math.pi / 180
-    Sh = 2 * 6371000 * math.asin(math.sqrt(
-        math.sin((lon2 - lon1) / 2) ** 2 + math.cos(lon1) * math.cos(lon2) * math.sin((lat2 - lat1) / 2) ** 2))
-    return Sh
 
 
 if __name__ == '__main__':
