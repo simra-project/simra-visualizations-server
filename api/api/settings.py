@@ -26,7 +26,7 @@ SECRET_KEY = 'zs!2%fi$!d$2yub#a98pwi5&b=a=+70^q)3brlnxyb+u94ql4h'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["207.180.205.80"]
 
 
 # Application definition
@@ -88,7 +88,8 @@ DATABASES = {
         'USER': 'simra',
         'PASSWORD': 'simra12345simra',
         'HOST': '127.0.0.1',
-        'PORT': '5432'
+        'PORT': '5432',
+        'COMMAND_TIMEOUT': 600
     }
 }
 

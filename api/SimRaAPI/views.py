@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework_gis.filters import InBBOXFilter, GeometryFilter, GeoFilterSet
 
-from .models import Incident, Ride, ParsedFiles
-from .serializers import IncidentSerializer, RideSerializer, ParsedFilesSerializer
+from .models import Incident, Ride, ParsedFiles, OsmWaysLegs
+from .serializers import IncidentSerializer, RideSerializer, ParsedFilesSerializer, LegSerializer
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -18,11 +18,23 @@ class ParsedFilesViewSet(viewsets.ModelViewSet):
     serializer_class = ParsedFilesSerializer
 
 
+class IncidentContainsFilter(GeoFilterSet):
+    contains = GeometryFilter(
+            field_name = 'geom', lookup_expr='coveredby'
+    )
+
+    class Meta:
+        model = Ride
+        fields = ['contains']
+
+
 class IncidentViewSet(viewsets.ModelViewSet):
     queryset = Incident.objects.all()
     serializer_class = IncidentSerializer
     bbox_filter_field = "geom"
-    filter_backends = (InBBOXFilter,)
+
+    filter_class = IncidentContainsFilter
+    filter_backends = (InBBOXFilter, DjangoFilterBackend)
 
     @method_decorator(cache_page(60 * 60 * 24))
     def dispatch(self, request, *args, **kwargs):
@@ -53,4 +65,12 @@ class RideViewSet(viewsets.ModelViewSet):
 
     filter_class = ContainsFilter
     filter_backends = (InBBOXFilter, DjangoFilterBackend)
+
+
+class LegViewSet(viewsets.ModelViewSet):
+    queryset = OsmWaysLegs.objects.all()
+    serializer_class = LegSerializer
+    bbox_filter_field = "geom"
+    filter_backends = (InBBOXFilter,)
+
 
