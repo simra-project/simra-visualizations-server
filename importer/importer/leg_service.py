@@ -1,5 +1,4 @@
 import pandas as pd
-import random
 
 POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE = 0.00002
 
@@ -66,7 +65,6 @@ def update_legs(ride, legs, cur, IRI, phone_loc):
             df.at[i, 'weekday_count'] += 1
         if is_rushhour(ride.timestamps):
             df.at[i, 'rushhour_count'] += 1
-
 
     cur.execute("""
         CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, rushhour_count INT, id BIGINT, score_array FLOAT[]) ON COMMIT DROP
