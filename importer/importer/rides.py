@@ -1,13 +1,12 @@
 import incidents
 import csv
 from postgis import LineString, Point
-from datetime import datetime, timedelta
+from datetime import datetime
 from db_connection import DatabaseConnection
 import filters
 import map_match_service
 import leg_service
 import stop_service
-import math
 import velocity_service
 import surface_quality_service
 
@@ -47,25 +46,28 @@ def handle_ride(data, filename, cur, phone_loc):
                 return
             timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))  # timeStamp is in Java TS Format
         if row["X"]:
-            accelerations.append((float(row["X"]), float(row["Y"]), float(row["Z"]), datetime.utcfromtimestamp(int(row["timeStamp"])/1000), raw_coords[-1]))
+            accelerations.append((float(row["X"]), float(row["Y"]), float(row["Z"]),
+                                  datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000), raw_coords[-1]))
     ride = Ride(raw_coords, accuracies, timestamps)
 
     if len(ride.raw_coords) == 0:
         return
 
     IRI, ride_sections = surface_quality_service.process_surface(ride, accelerations)
+    velocity_sections = velocity_service.process_velocity(ride, cur)
 
     ride = filters.apply_smoothing_filters(ride)
     if filters.apply_removal_filters(ride):
         return
+
     map_matched = map_match_service.map_match(ride)
     if len(map_matched) == 0:
         return
+
     legs = leg_service.determine_legs(map_matched, cur)
-    leg_service.update_legs(ride, legs, cur, IRI, phone_loc)
+    leg_service.update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections)
 
     stop_service.process_stops(ride, legs, cur)
-    velocity_service.process_velocity(ride, cur)
 
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]

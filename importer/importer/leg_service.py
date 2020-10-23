@@ -33,7 +33,9 @@ def find_legs(cur):
            score,
            "weekdayCount",
            "rushhourCount",
-           "score_array"
+           "score_array",
+           "velocity",
+           "velocity_array"
         FROM (
              SELECT
                     l.id,
@@ -44,7 +46,9 @@ def find_legs(cur):
                     score,
                     "weekdayCount",
                     "rushhourCount",
-                    "score_array"
+                    "score_array",
+                    "velocity",
+                    "velocity_array"
              FROM ride r,
                   public."SimRaAPI_osmwayslegs" l
              WHERE r.geometry && l.geom
@@ -55,10 +59,10 @@ def find_legs(cur):
     return cur.fetchall()
 
 
-def update_legs(ride, legs, cur, IRI, phone_loc):
+def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
     df = pd.DataFrame(data=legs, index=range(len(legs)),
                       columns=['id', 'osm_id', 'geometry', 'street_name', 'count', 'score', 'weekday_count',
-                               'rushhour_count', "score_array"])
+                               'rushhour_count', "score_array", "velocity", "velocity_array"])
     df['count'] += 1
     for i, leg in df.iterrows():
         if is_weekday(ride.timestamps):
@@ -67,7 +71,7 @@ def update_legs(ride, legs, cur, IRI, phone_loc):
             df.at[i, 'rushhour_count'] += 1
 
     cur.execute("""
-        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, rushhour_count INT, id BIGINT, score_array FLOAT[]) ON COMMIT DROP
+        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, rushhour_count INT, id BIGINT, score_array FLOAT[], velocity FLOAT, velocity_array FLOAT[]) ON COMMIT DROP
         """)
 
     cur.execute("""
@@ -97,10 +101,27 @@ def update_legs(ride, legs, cur, IRI, phone_loc):
             else:
                 df.at[i, "score"] = -1
 
-    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'rushhour_count', 'id', 'score_array']].to_numpy()]
+    for vel_section in velocity_sections:
+        cur.execute("""
+                    SELECT id, ST_Distance(geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
+                """, (vel_section[0][0], vel_section[0][1]))
+        candidates = cur.fetchall()
+        for candidate in candidates:
+            if candidate[0] in list(df["id"]):
+                for i in df.loc[df['id'] == candidate[0]]["velocity_array"]:
+                    i.append(vel_section[2])
+                break
+
+    for i, leg in df.iterrows():
+        if len(df.at[i, 'velocity_array']) > 0:
+            df.at[i, 'velocity'] = sum(df.at[i, "velocity_array"]) / len(df.at[i, "velocity_array"])
+        else:
+            df.at[i, "velocity"] = -1
+
+    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'rushhour_count', 'id', 'score_array', "velocity", "velocity_array"]].to_numpy()]
     cur.executemany("""
-      INSERT INTO updated_legs (count, score, weekday_count, rushhour_count, id, score_array)
-      VALUES(%s, %s, %s, %s, %s, %s)""",
+      INSERT INTO updated_legs (count, score, weekday_count, rushhour_count, id, score_array, velocity, velocity_array)
+      VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
                     tuples)
 
     cur.execute("""
@@ -110,7 +131,9 @@ def update_legs(ride, legs, cur, IRI, phone_loc):
                 score = updated_legs.score,
                 "weekdayCount" = updated_legs.weekday_count,
                 "rushhourCount" = updated_legs.rushhour_count,
-                "score_array" = updated_legs.score_array
+                "score_array" = updated_legs.score_array,
+                "velocity" = updated_legs.velocity,
+                "velocity_array" = updated_legs.velocity_array
             FROM updated_legs
             WHERE updated_legs.id = public."SimRaAPI_osmwayslegs".id;
             """)
