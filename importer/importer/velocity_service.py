@@ -13,6 +13,7 @@ def process_velocity(ride, cur):
     ride_sections = calc_ride_sections_relative_velocity(continuous_ride, v_avg)
     return ride_sections
 
+
 def remove_slow_sections(ride, slow_sections):
     continuous_ride = copy.deepcopy(ride)
     indices_to_remove = []
@@ -43,5 +44,5 @@ def calc_ride_sections_relative_velocity(continuous_ride, v_avg):
             distance = great_circle(continuous_ride.raw_coords[i], continuous_ride.raw_coords[i + 1]).meters
             duration = (continuous_ride.timestamps[i + 1] - continuous_ride.timestamps[i]).seconds
             vel = distance / duration  # in m/s
-            ride_sections.append((current, vel, vel/v_avg))
+            ride_sections.append((current, vel, vel / v_avg))
     return ride_sections
