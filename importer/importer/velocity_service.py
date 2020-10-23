@@ -40,7 +40,6 @@ def calc_ride_sections_relative_velocity(continuous_ride, v_avg):
     for i in range(len(continuous_ride.raw_coords)):
         if i + 1 < len(continuous_ride.raw_coords):
             current = continuous_ride.raw_coords[i]
-            ls = continuous_ride.raw_coords[i: i + 2]
             distance = great_circle(continuous_ride.raw_coords[i], continuous_ride.raw_coords[i + 1]).meters
             duration = (continuous_ride.timestamps[i + 1] - continuous_ride.timestamps[i]).seconds
             vel = distance / duration  # in m/s
