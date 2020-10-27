@@ -24,7 +24,7 @@ def create_gpx(coords):
 
 
 def query_map_match_server(gpx_xml):
-    # curl -XPOST -H "Content-Type: application/gpx+xml" -d @route.gpx "localhost:8989/match?vehicle=bike&type=gpx&gps_accuracy=100"
+    # curl -XPOST -H "Content-Type: application/gpx+xml" -d @route.gpx "localhost:8989/match?vehicle=bike&type=gpx&gps_accuracy=50"
     map_matched = []
     url = 'http://localhost:8989/match?vehicle=bike&type=gpx&gps_accuracy=50'
     headers = {'Content-Type': 'application/gpx+xml'}

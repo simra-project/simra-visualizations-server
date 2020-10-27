@@ -16,3 +16,5 @@ MIN_DISTANCE_TO_COVER_IN_5_MIN = 100  # in meters
 
 COVERED_DISTANCE_INSIDE_STOP_THRESHOLD = 0.5  # in meters
 DISTANCE_TO_JUNCTION_THRESHOLD = 30  # in meters
+
+COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD = 4.2  # in meters. ≈ 5km/h with a resolution of 1coord/3secs
