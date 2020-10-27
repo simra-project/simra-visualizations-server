@@ -6,8 +6,8 @@ DB_USER = "simra"
 DB_PASSWORD = "simra12345simra"
 DB_PORT = 5432
 
-MIN_ACCURACY = 10
-RDP_EPSILON = 0.0000001
+MIN_ACCURACY = float('inf')
+RDP_EPSILON = 0.000005
 
 MIN_RIDE_DISTANCE = 200  # in meters
 MIN_RIDE_DURATION = 3 * 60  # in seconds
