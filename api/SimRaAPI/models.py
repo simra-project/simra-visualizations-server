@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 class ParsedFiles(models.Model):
     fileName = models.CharField(max_length=32)
     fileType = models.CharField(max_length=32)
+    region = models.CharField(max_length=32, default="unknown")
     importTimestamp = models.DateTimeField(auto_now=True)
 
 
