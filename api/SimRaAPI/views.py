@@ -24,7 +24,7 @@ class IncidentContainsFilter(GeoFilterSet):
     )
 
     class Meta:
-        model = Ride
+        model = Incident
         fields = ['contains']
 
 
