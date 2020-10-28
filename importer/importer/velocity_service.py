@@ -1,5 +1,5 @@
-from importer.importer.stop_service import find_stops_in_raw_coords
-from importer.importer.settings import COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD
+from stop_service import find_stops_in_raw_coords
+from settings import COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD
 import copy
 from geopy.distance import great_circle
 

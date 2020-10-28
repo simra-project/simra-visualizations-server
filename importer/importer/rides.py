@@ -9,6 +9,7 @@ import leg_service
 import stop_service
 import velocity_service
 import surface_quality_service
+import settings
 
 
 def handle_ride_file(filename, cur):
@@ -25,6 +26,8 @@ def handle_ride_file(filename, cur):
             else:
                 ride.append(line)
         phone_loc = incidents.handle_incidents(incident_list, filename, cur)
+        if settings.GET_ALL_SURFACE_SCORES:
+            phone_loc = "1"
         handle_ride(ride, filename, cur, phone_loc)
 
 
@@ -74,7 +77,7 @@ def handle_ride(data, filename, cur, phone_loc):
 
     start = Point(ride.raw_coords_filtered[0], srid=4326)
     end = Point(ride.raw_coords_filtered[-1], srid=4326)
-    if phone_loc == 1:  # Handlebar
+    if phone_loc == 1 or phone_loc == "1":  # Handlebar
         print("Phone is on Handlebar, finding road surface quality")
         try:
             cur.executemany("""
