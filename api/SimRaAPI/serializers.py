@@ -28,3 +28,4 @@ class LegSerializer(GeoFeatureModelSerializer):
         model = OsmWaysLegs
         geo_field = 'geom'
         fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'rushhourCount')
+

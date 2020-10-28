@@ -16,6 +16,7 @@ if __name__ == '__main__':
         if "Profiles" in file:
             continue
         filename = file.split("/")[-1]
+        region = file.split("/")[-3]
         with DatabaseConnection() as cur:
             cur.execute("""
                 SELECT * FROM public."SimRaAPI_parsedfiles" WHERE "fileName" LIKE %s
@@ -32,8 +33,8 @@ if __name__ == '__main__':
                     rides.handle_ride_file(file, cur)
 
                 cur.execute("""
-                    INSERT INTO public."SimRaAPI_parsedfiles" ("fileName", "fileType", "importTimestamp") VALUES (%s, %s, %s)
-                """, [filename, "profile" if "Profiles" in file else "ride", datetime.datetime.utcnow()])
+                    INSERT INTO public."SimRaAPI_parsedfiles" ("fileName", "fileType", "region", "importTimestamp") VALUES (%s, %s, %s, %s)
+                """, [filename, "profile" if "Profiles" in file else "ride", region, datetime.datetime.utcnow()])
         except Exception as e:
             raise(e)
             print(f"Skipped ride {filename} due to exception {e}")

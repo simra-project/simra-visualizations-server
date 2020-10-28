@@ -13,9 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import re_path, include
+from django.urls import re_path, include, path
 from rest_framework import routers
-from SimRaAPI.views import RideViewSet, IncidentViewSet, ParsedFilesViewSet, LegViewSet
+from SimRaAPI.views import RideViewSet, IncidentViewSet, ParsedFilesViewSet, LegViewSet, get_statistics
 
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'rides', RideViewSet)
@@ -24,5 +24,6 @@ router.register(r'files', ParsedFilesViewSet)
 router.register(r'legs', LegViewSet)
 
 urlpatterns = [
-    re_path(r'^api/', include(router.urls))
+    re_path(r'^api/', include(router.urls)),
+    path('api/statistics/<str:region>/', get_statistics)  # get statistics for a specific region
 ]

@@ -57,7 +57,7 @@ def handle_ride(data, filename, cur, phone_loc):
         return
 
     IRI, ride_sections = surface_quality_service.process_surface(ride, accelerations)
-    velocity_sections = velocity_service.process_velocity(ride, cur)
+    velocity_sections = velocity_service.process_velocity(ride)
 
     ride = filters.apply_smoothing_filters(ride)
     if filters.apply_removal_filters(ride):
