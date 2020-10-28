@@ -26,7 +26,7 @@ def find_junctions(legs, cur):
 
 def process_stops(ride, legs, cur):
     all_ride_junctions = find_junctions(legs, cur)
-    raw_stops = find_stops_in_raw_coords(ride)
+    raw_stops = find_stops_in_raw_coords(ride, COVERED_DISTANCE_INSIDE_STOP_THRESHOLD)
     stops = find_junctions_of_stops(raw_stops, cur)
     no_stop_junctions = [jnc for jnc in all_ride_junctions if jnc[0] not in [stop.junction[0] for stop in stops]]  # junctions, where cyclist did not stop
     for jnc in no_stop_junctions:
@@ -36,23 +36,28 @@ def process_stops(ride, legs, cur):
             continue
         update_junction(stop.junction, stop.duration.seconds, cur)
 
-def find_stops_in_raw_coords(ride):
+def find_stops_in_raw_coords(ride, stop_threshold):
     stops = []
     coords = ride.raw_coords
     inside_stop = False
     for i, coord in enumerate(coords):
         if i + 1 < len(coords):
-            if great_circle(coords[i], coords[i + 1]).meters < COVERED_DISTANCE_INSIDE_STOP_THRESHOLD:
+            if great_circle(coords[i], coords[i + 1]).meters < stop_threshold:
                 if not inside_stop:
                     inside_stop = True
                     stop = Stop(coord)
                     start = ride.timestamps[i]
+                stop.indices.append(i)
             else:
                 if inside_stop:
                     stop.duration = ride.timestamps[i] - start
                     stops.append(stop)
                     inside_stop = False
         else:
+            if inside_stop:
+                stop.indices.append(i)
+                stop.duration = ride.timestamps[i] - start
+                stops.append(stop)
             break
     return stops
 
@@ -106,3 +111,4 @@ class Stop:
         self.raw_coord = raw_coord
         self.junction = None
         self.duration = None
+        self.indices = []
