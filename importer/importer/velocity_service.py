@@ -4,11 +4,13 @@ import copy
 from geopy.distance import great_circle
 
 
-def process_velocity(ride, cur):
+def process_velocity(ride):
     slow_sections = find_stops_in_raw_coords(ride, COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD)
     continuous_ride = remove_slow_sections(ride, slow_sections)
     total_distance = calc_total_distance(continuous_ride.raw_coords)
     total_duration = (continuous_ride.timestamps[-1] - continuous_ride.timestamps[0]).seconds
+    if total_duration == 0:
+        return
     v_avg = total_distance / total_duration
     ride_sections = calc_ride_sections_relative_velocity(continuous_ride, v_avg)
     return ride_sections
