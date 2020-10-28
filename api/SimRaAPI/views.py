@@ -10,7 +10,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.db import connection
 from django.http import HttpResponse
-import json
 
 import memcache
 
@@ -78,7 +77,7 @@ class LegViewSet(viewsets.ModelViewSet):
     filter_backends = (InBBOXFilter,)
 
 
-def get_statistics(self):
+def get_statistics(request, region):
     with connection.cursor() as cursor:
         cursor.execute('''
             SELECT
@@ -120,7 +119,8 @@ def get_statistics(self):
                COUNT(*) as r_count,
                Sum(ST_Length(geom::geography)) as r_meters,
                EXTRACT(EPOCH FROM (SUM(timestamps[array_upper(timestamps, 1)] - timestamps[1]))) as r_seconds
-          FROM "SimRaAPI_ride"
+            FROM "SimRaAPI_ride" INNER JOIN "SimRaAPI_parsedfiles" SRAp on "SimRaAPI_ride".filename = SRAp."fileName"
+            WHERE region = %s
         ) r , (
             SELECT
                 COUNT(*) as i_count,
@@ -149,7 +149,8 @@ def get_statistics(self):
                 COUNT("iType") filter (where "iType" = 8) as i_iType_8,
                 COUNT("iType") filter (where "iType" = 9) as i_iType_9,
                 COUNT("iType") filter (where "iType" = 10) as i_iType_10
-            FROM "SimRaAPI_incident") i
-                ''')
+            FROM "SimRaAPI_incident" INNER JOIN "SimRaAPI_parsedfiles" SRAp on "SimRaAPI_incident".filename = SRAp."fileName"
+            WHERE region = %s) i
+                ''', [region, region])
         columns = [col[0] for col in cursor.description]
         return HttpResponse([dict(zip(columns, row)) for row in cursor.fetchall()])

@@ -25,6 +25,5 @@ router.register(r'legs', LegViewSet)
 
 urlpatterns = [
     re_path(r'^api/', include(router.urls)),
-    path('api/statistics/', get_statistics)
-    #path('api/statistics/<slug:slug>/', get_statistics)
+    path('api/statistics/<str:region>/', get_statistics)  # get statistics for a specific region
 ]
