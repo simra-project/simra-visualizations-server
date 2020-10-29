@@ -1,5 +1,5 @@
 from geopy.distance import great_circle
-from importer.importer.settings import COVERED_DISTANCE_INSIDE_STOP_THRESHOLD, DISTANCE_TO_JUNCTION_THRESHOLD
+from settings import COVERED_DISTANCE_INSIDE_STOP_THRESHOLD, DISTANCE_TO_JUNCTION_THRESHOLD
 
 
 def find_junctions(legs, cur):
