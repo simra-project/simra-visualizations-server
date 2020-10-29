@@ -54,7 +54,8 @@ class OsmWaysLegs(models.Model):
     velocity = models.FloatField(default=0)
     velocity_array = ArrayField(models.FloatField(), default=list)
     weekdayCount = models.IntegerField(default=0)
-    rushhourCount = models.IntegerField(default=0)
+    morningCount = models.IntegerField(default=0)
+    eveningCount = models.IntegerField(default=0)
 
 
 class OsmLargeJunctions(models.Model):
