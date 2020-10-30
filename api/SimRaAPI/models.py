@@ -56,7 +56,8 @@ class OsmWaysLegs(models.Model):
     weekdayCount = models.IntegerField(default=0)
     morningCount = models.IntegerField(default=0)
     eveningCount = models.IntegerField(default=0)
-    incidentCount = models.IntegerField(default=0)
+    normalIncidentCount = models.IntegerField(default=0)
+    scaryIncidentCount = models.IntegerField(default=0)
 
 
 class OsmLargeJunctions(models.Model):
