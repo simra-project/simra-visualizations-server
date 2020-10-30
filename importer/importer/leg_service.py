@@ -109,7 +109,6 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_loc
             else:
                 df.at[i, "score"] = -1
     for incident in incident_locs:
-        print(incident[0])
         cur.execute("""
                     SELECT id, ST_Distance(geom, %s) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
         """, (incident[0],))
@@ -120,7 +119,6 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_loc
                     df.loc[df['id'] == candidate[0], "normal_incident_count"] += 1
                 else:
                     df.loc[df['id'] == candidate[0], "scary_incident_count"] += 1
-            print(df)
 
 
     for vel_section in velocity_sections:
