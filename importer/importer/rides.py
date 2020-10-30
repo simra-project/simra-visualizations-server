@@ -25,13 +25,13 @@ def handle_ride_file(filename, cur):
                 incident_list.append(line)
             else:
                 ride.append(line)
-        phone_loc = incidents.handle_incidents(incident_list, filename, cur)
+        phone_loc, incident_locs = incidents.handle_incidents(incident_list, filename, cur)
         if settings.GET_ALL_SURFACE_SCORES:
             phone_loc = "1"
-        handle_ride(ride, filename, cur, phone_loc)
+        handle_ride(ride, filename, cur, phone_loc, incident_locs)
 
 
-def handle_ride(data, filename, cur, phone_loc):
+def handle_ride(data, filename, cur, phone_loc, incident_locs):
     data = csv.DictReader(data[1:], delimiter=",")
 
     raw_coords = []
@@ -68,7 +68,7 @@ def handle_ride(data, filename, cur, phone_loc):
         return
 
     legs = leg_service.determine_legs(map_matched, cur)
-    leg_service.update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections)
+    leg_service.update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_locs)
 
     stop_service.process_stops(ride, legs, cur)
 

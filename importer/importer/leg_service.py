@@ -36,7 +36,9 @@ def find_legs(cur):
            "eveningCount",
            "score_array",
            "velocity",
-           "velocity_array"
+           "velocity_array",
+           "normalIncidentCount",
+           "scaryIncidentCount"
         FROM (
              SELECT
                     l.id,
@@ -50,7 +52,9 @@ def find_legs(cur):
                     "eveningCount",
                     "score_array",
                     "velocity",
-                    "velocity_array"
+                    "velocity_array",
+                    "normalIncidentCount",
+                    "scaryIncidentCount"
              FROM ride r,
                   public."SimRaAPI_osmwayslegs" l
              WHERE r.geometry && l.geom
@@ -61,10 +65,10 @@ def find_legs(cur):
     return cur.fetchall()
 
 
-def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
+def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_locs):
     df = pd.DataFrame(data=legs, index=range(len(legs)),
                       columns=['id', 'osm_id', 'geometry', 'street_name', 'count', 'score', 'weekday_count',
-                               'morning_count', "evening_count", "score_array", "velocity", "velocity_array"])
+                               'morning_count', "evening_count", "score_array", "velocity", "velocity_array", "normal_incident_count", "scary_incident_count"])
     df['count'] += 1
     for i, leg in df.iterrows():
         if is_weekday(ride.timestamps):
@@ -75,7 +79,7 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
             df.at[i, 'evening_count'] += 1
 
     cur.execute("""
-        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, morning_count INT, evening_count INT, id BIGINT, score_array FLOAT[], velocity FLOAT, velocity_array FLOAT[]) ON COMMIT DROP
+        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, morning_count INT, evening_count INT, id BIGINT, score_array FLOAT[], velocity FLOAT, velocity_array FLOAT[], normal_incident_count INT, scary_incident_count INT) ON COMMIT DROP
         """)
 
     cur.execute("""
@@ -104,6 +108,20 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
                 df.at[i, 'score'] = sum(df.at[i, "score_array"]) / len(df.at[i, "score_array"])
             else:
                 df.at[i, "score"] = -1
+    for incident in incident_locs:
+        print(incident[0])
+        cur.execute("""
+                    SELECT id, ST_Distance(geom, %s) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
+        """, (incident[0],))
+        candidates = cur.fetchall()
+        for candidate in candidates:
+            if candidate[0] in list(df["id"]):
+                if not incident[1]:
+                    df.loc[df['id'] == candidate[0], "normal_incident_count"] += 1
+                else:
+                    df.loc[df['id'] == candidate[0], "scary_incident_count"] += 1
+            print(df)
+
 
     for vel_section in velocity_sections:
         cur.execute("""
@@ -122,10 +140,10 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
         else:
             df.at[i, "velocity"] = -1
 
-    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'morning_count', "evening_count", 'id', 'score_array', "velocity", "velocity_array"]].to_numpy()]
+    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'morning_count', "evening_count", 'id', 'score_array', "velocity", "velocity_array", "normal_incident_count", "scary_incident_count"]].to_numpy()]
     cur.executemany("""
-      INSERT INTO updated_legs (count, score, weekday_count, morning_count, evening_count, id, score_array, velocity, velocity_array)
-      VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+      INSERT INTO updated_legs (count, score, weekday_count, morning_count, evening_count, id, score_array, velocity, velocity_array, normal_incident_count, scary_incident_count)
+      VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     tuples)
 
     cur.execute("""
@@ -138,7 +156,9 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
                 "eveningCount" = updated_legs.evening_count,
                 "score_array" = updated_legs.score_array,
                 "velocity" = updated_legs.velocity,
-                "velocity_array" = updated_legs.velocity_array
+                "velocity_array" = updated_legs.velocity_array,
+                "normalIncidentCount" = updated_legs.normal_incident_count,
+                "scaryIncidentCount" = updated_legs.scary_incident_count
             FROM updated_legs
             WHERE updated_legs.id = public."SimRaAPI_osmwayslegs".id;
             """)
