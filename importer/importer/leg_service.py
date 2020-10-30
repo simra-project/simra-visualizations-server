@@ -149,11 +149,11 @@ def is_weekday(timestamps):
 
 
 def is_morning(timestamps):
-    hour = timestamps[int(len(timestamps/2))].hour
+    hour = timestamps[int(len(timestamps)/2)].hour
     return 6 <= hour < 9
 
 
 def is_evening(timestamps):
-    hour = timestamps[int(len(timestamps/2))].hour
+    hour = timestamps[int(len(timestamps)/2)].hour
     return 16 <= hour < 19
 
