@@ -32,10 +32,13 @@ def find_legs(cur):
            count,
            score,
            "weekdayCount",
-           "rushhourCount",
+           "morningCount",
+           "eveningCount",
            "score_array",
            "velocity",
-           "velocity_array"
+           "velocity_array",
+           "normalIncidentCount",
+           "scaryIncidentCount"
         FROM (
              SELECT
                     l.id,
@@ -45,10 +48,13 @@ def find_legs(cur):
                     count,
                     score,
                     "weekdayCount",
-                    "rushhourCount",
+                    "morningCount",
+                    "eveningCount",
                     "score_array",
                     "velocity",
-                    "velocity_array"
+                    "velocity_array",
+                    "normalIncidentCount",
+                    "scaryIncidentCount"
              FROM ride r,
                   public."SimRaAPI_osmwayslegs" l
              WHERE r.geometry && l.geom
@@ -59,19 +65,21 @@ def find_legs(cur):
     return cur.fetchall()
 
 
-def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
+def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_locs):
     df = pd.DataFrame(data=legs, index=range(len(legs)),
                       columns=['id', 'osm_id', 'geometry', 'street_name', 'count', 'score', 'weekday_count',
-                               'rushhour_count', "score_array", "velocity", "velocity_array"])
+                               'morning_count', "evening_count", "score_array", "velocity", "velocity_array", "normal_incident_count", "scary_incident_count"])
     df['count'] += 1
     for i, leg in df.iterrows():
         if is_weekday(ride.timestamps):
             df.at[i, 'weekday_count'] += 1
-        if is_rushhour(ride.timestamps):
-            df.at[i, 'rushhour_count'] += 1
+        if is_morning(ride.timestamps):
+            df.at[i, 'morning_count'] += 1
+        if is_evening(ride.timestamps):
+            df.at[i, 'evening_count'] += 1
 
     cur.execute("""
-        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, rushhour_count INT, id BIGINT, score_array FLOAT[], velocity FLOAT, velocity_array FLOAT[]) ON COMMIT DROP
+        CREATE TEMP TABLE updated_legs(count INT, score FLOAT, weekday_count INT, morning_count INT, evening_count INT, id BIGINT, score_array FLOAT[], velocity FLOAT, velocity_array FLOAT[], normal_incident_count INT, scary_incident_count INT) ON COMMIT DROP
         """)
 
     cur.execute("""
@@ -82,7 +90,7 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
                     INSERT INTO legs_to_match (id, geom) VALUES(%s, ST_GeomFromText(%s,4326))
                     """, tup)
 
-    if phone_loc == 1:  # Handlebar
+    if phone_loc == 1 or phone_loc == "1":  # Handlebar
         from tqdm import tqdm
         for iri in tqdm(IRI):
             cur.execute("""
@@ -100,6 +108,18 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
                 df.at[i, 'score'] = sum(df.at[i, "score_array"]) / len(df.at[i, "score_array"])
             else:
                 df.at[i, "score"] = -1
+    for incident in incident_locs:
+        cur.execute("""
+                    SELECT id, ST_Distance(geom, %s) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
+        """, (incident[0],))
+        candidates = cur.fetchall()
+        for candidate in candidates:
+            if candidate[0] in list(df["id"]):
+                if not incident[1]:
+                    df.loc[df['id'] == candidate[0], "normal_incident_count"] += 1
+                else:
+                    df.loc[df['id'] == candidate[0], "scary_incident_count"] += 1
+
 
     for vel_section in velocity_sections:
         cur.execute("""
@@ -118,10 +138,10 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
         else:
             df.at[i, "velocity"] = -1
 
-    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'rushhour_count', 'id', 'score_array', "velocity", "velocity_array"]].to_numpy()]
+    tuples = [tuple(x) for x in df[['count', 'score', 'weekday_count', 'morning_count', "evening_count", 'id', 'score_array', "velocity", "velocity_array", "normal_incident_count", "scary_incident_count"]].to_numpy()]
     cur.executemany("""
-      INSERT INTO updated_legs (count, score, weekday_count, rushhour_count, id, score_array, velocity, velocity_array)
-      VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
+      INSERT INTO updated_legs (count, score, weekday_count, morning_count, evening_count, id, score_array, velocity, velocity_array, normal_incident_count, scary_incident_count)
+      VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     tuples)
 
     cur.execute("""
@@ -130,10 +150,13 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections):
                 count = updated_legs.count,
                 score = updated_legs.score,
                 "weekdayCount" = updated_legs.weekday_count,
-                "rushhourCount" = updated_legs.rushhour_count,
+                "morningCount" = updated_legs.morning_count,
+                "eveningCount" = updated_legs.evening_count,
                 "score_array" = updated_legs.score_array,
                 "velocity" = updated_legs.velocity,
-                "velocity_array" = updated_legs.velocity_array
+                "velocity_array" = updated_legs.velocity_array,
+                "normalIncidentCount" = updated_legs.normal_incident_count,
+                "scaryIncidentCount" = updated_legs.scary_incident_count
             FROM updated_legs
             WHERE updated_legs.id = public."SimRaAPI_osmwayslegs".id;
             """)
@@ -143,6 +166,12 @@ def is_weekday(timestamps):
     return timestamps[0].weekday() < 5
 
 
-def is_rushhour(timestamps):
-    hour = timestamps[0].hour
-    return (7 <= hour <= 14) | (15 <= hour <= 18)
+def is_morning(timestamps):
+    hour = timestamps[int(len(timestamps)/2)].hour
+    return 6 <= hour < 9
+
+
+def is_evening(timestamps):
+    hour = timestamps[int(len(timestamps)/2)].hour
+    return 16 <= hour < 19
+
