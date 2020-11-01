@@ -2,7 +2,7 @@
 <Map srs="+init=epsg:3857">
     <Style name="legs" filter-mode="first">
         <Rule>
-            <MarkersSymbolizer fill="[color]" stroke-width="0.0" width="[sizePx]" height="[sizePx]" allow-overlap="true" opacity="0.9"/>
+            <MarkersSymbolizer fill="[color]" stroke-width="0.0" width="[size]" height="[size]" allow-overlap="true" opacity="0.9"/>
         </Rule>
     </Style>
     <Layer name="legs" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
@@ -17,7 +17,7 @@
                 select
                     *,
                     concat('hsl(', ROUND((1.0 - LEAST("avgDuration" / 1.0, 1)) * 120.0), ', 69%, 50%)') as color,
-                    (LEAST("count" / 50.0, 1.0) * 40) + 5 as sizePx
+                    (LEAST("count" / 50.0, 1.0) * 40) + 5 as size
                 from public."SimRaAPI_osmlargejunctions"
                 where count >= 10
             ) t</Parameter>
