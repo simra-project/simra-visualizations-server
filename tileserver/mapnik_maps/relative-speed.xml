@@ -2,7 +2,7 @@
 <Map srs="+init=epsg:3857">
     <Style name="legs" filter-mode="first">
         <Rule>
-            <LineSymbolizer stroke="[color]" stroke-width="[width]"/>
+            <LineSymbolizer stroke="[color]" stroke-width="3.0"/>
         </Rule>
     </Style>
     <Layer name="legs" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
@@ -13,13 +13,29 @@
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
+            <!-- 100  % 68,153, 53 dark green -->
+            <!--  50  % 142,192, 84 light green -->
+            <!--  37.5% 237,226,  4 yellow -->
+            <!--  25  % 239,125,  7 orange -->
+            <!--  12.5% 227, 11, 19 red -->
+            <!--   0  % 158, 26, 22 dark red -->
             <Parameter name="table">(
-                select
+                select 
                     *,
-                    concat('hsl(', ROUND(LEAST(velocity / 2.0, 1) * 120.0), ' , 69%, 50%)') as color,
-                    sqrt(count / 500.0) * 4.5 + 1.5 as width
-                from public."SimRaAPI_osmwayslegs"
-                where count > 0 and velocity >= 0
+                    CASE 
+                        WHEN c_score BETWEEN 0.0 AND 0.125 THEN concat('rgb(', ROUND(158 + (c_score / 0.125) * 69.0), ',', ROUND(26 - (c_score / 0.125) * 15.0), ',', ROUND(22 - (c_score / 0.125) * 3.0), ')')
+                        WHEN c_score BETWEEN 0.125 AND 0.25 THEN concat('rgb(', ROUND(227 + ((c_score - 0.25) / 0.125) * 12.0), ',', ROUND(11 + ((c_score - 0.125) / 0.15) * 114.0), ',', ROUND(19 - ((c_score - 0.25) / 0.125) * 8.0), ')')
+                        WHEN c_score BETWEEN 0.25 AND 0.375 THEN concat('rgb(', ROUND(239 - ((c_score - 0.25) / 0.125) * 2.0), ',', ROUND(125 + ((c_score - 0.25) / 0.125) * 101.0), ',', ROUND(7 - ((c_score - 0.25) / 0.125) * 3.0), ')')
+                        WHEN c_score BETWEEN 0.375 AND 0.5 THEN concat('rgb(', ROUND(237 - ((c_score - 0.375) / 0.125) * 95.0), ',', ROUND(226 - ((c_score - 0.375) / 0.125) * 34.0), ',', ROUND(4 + ((c_score - 0.375) / 0.125) * 8.0), ')')
+                        ELSE concat('rgb(', ROUND(142 - ((c_score - 0.5) / 0.5) * 74.0), ',', ROUND(192 - ((c_score - 0.5) / 0.5) * 39.0), ',', ROUND(84 - ((c_score - 0.5) / 0.5) * 31.0), ')')
+                    END as color
+                from (
+                    select
+                        *,
+                        GREATEST(LEAST(velocity - 0.5, 1), 0) as c_score
+                    from public."SimRaAPI_osmwayslegs"
+                    where count > 0 and velocity >= 0
+                ) q
             ) t</Parameter>
         </Datasource>
     </Layer>

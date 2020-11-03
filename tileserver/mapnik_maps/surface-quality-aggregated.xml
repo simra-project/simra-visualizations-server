@@ -13,12 +13,29 @@
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
+            <!-- 100%  68,153, 53 dark green -->
+            <!--  75% 142,192, 84 light green -->
+            <!--  50% 237,226,  4 yellow -->
+            <!--  30% 239,125,  7 orange -->
+            <!--  15% 227, 11, 19 red -->
+            <!--   0% 158, 26, 22 dark red -->
             <Parameter name="table">(
-                select
+                select 
                     *,
-                    concat('hsl(', ROUND((1 - LEAST(score / 0.25, 1)) * 120.0), ' , 69%, 50%)') as color
-                from public."SimRaAPI_osmwayslegs"
-                where score > 0
+                    CASE 
+                        WHEN c_score BETWEEN 0.0 AND 0.15 THEN concat('rgb(', ROUND(158 + (c_score / 0.15) * 69.0), ',', ROUND(26 - (c_score / 0.15) * 15.0), ',', ROUND(22 - (c_score / 0.15) * 3.0), ')')
+                        WHEN c_score BETWEEN 0.15 AND 0.30 THEN concat('rgb(', ROUND(227 + ((c_score - 0.15) / 0.15) * 12.0), ',', ROUND(11 + ((c_score - 0.15) / 0.15) * 114.0), ',', ROUND(19 - ((c_score - 0.15) / 0.15) * 8.0), ')')
+                        WHEN c_score BETWEEN 0.30 AND 0.50 THEN concat('rgb(', ROUND(239 - ((c_score - 0.3) / 0.2) * 2.0), ',', ROUND(125 + ((c_score - 0.3) / 0.2) * 101.0), ',', ROUND(7 - ((c_score - 0.3) / 0.2) * 3.0), ')')
+                        WHEN c_score BETWEEN 0.50 AND 0.75 THEN concat('rgb(', ROUND(237 - ((c_score - 0.5) / 0.25) * 95.0), ',', ROUND(226 - ((c_score - 0.5) / 0.25) * 34.0), ',', ROUND(4 + ((c_score - 0.5) / 0.25) * 8.0), ')')
+                        ELSE concat('rgb(', ROUND(142 - ((c_score - 0.75) / 0.25) * 74.0), ',', ROUND(192 - ((c_score - 0.75) / 0.25) * 39.0), ',', ROUND(84 - ((c_score - 0.75) / 0.25) * 31.0), ')')
+                    END as color
+                from (
+                    select
+                        *,
+                        1.0 - GREATEST(LEAST(score / 0.5, 1), 0) as c_score
+                    from public."SimRaAPI_osmwayslegs"
+                    where count > 0
+                ) q
             ) t</Parameter>
         </Datasource>
     </Layer>
