@@ -27,5 +27,5 @@ class LegSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = OsmWaysLegs
         geo_field = 'geom'
-        fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'rushhourCount')
+        fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'morning_count', 'evening_count')
 
