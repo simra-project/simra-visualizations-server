@@ -89,8 +89,11 @@ INSERT INTO public."SimRaAPI_ridesegment" (geom, score) VALUES (%s, %s)
 
     try:
         cur.execute("""
-            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
         """, [ls, timestamps, [i[0] for i in legs], filename, start, end])
+        ride_id = cur.fetchone()[0]
+        incidents.update_ride_ids([i[2] for i in incident_locs], ride_id)
+
     except:
         print(f"Problem parsing {filename}")
         raise Exception("Can not parse ride!")

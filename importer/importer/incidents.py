@@ -28,8 +28,16 @@ def handle_incidents(data, filename, cur):
         scary = row.get("scary", 0) == "1"
         desc = row.get("desc", "")
         geom = Point(row["lon"], row["lat"], srid=4326)
-        incidents.append((geom, scary))
         cur.execute("""
-            INSERT INTO public."SimRaAPI_incident" ("rideTimestamp", "bikeType", "childCheckbox", "trailerCheckbox", "pLoc", "incident", "iType", "scary", "desc", "filename", "geom") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO public."SimRaAPI_incident" ("rideTimestamp", "bikeType", "childCheckbox", "trailerCheckbox", "pLoc", "incident", "iType", "scary", "desc", "filename", "geom") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
         """, [rideTimestamp, bikeType, childCheckbox, trailerCheckbox, pLoc, incident, iType, scary, desc, filename, geom])
+        incident_id = cur.fetchone()
+        incidents.append((geom, scary, incident_id))
     return int(pLoc), incidents
+
+
+def update_ride_ids(incident_ids, ride_id, cur):
+    for incident_id in incident_ids:
+        cur.execute("""
+                    UPDATE public."SimRaAPI_incident" SET rideId = %s WHERE id = %s
+                """, [ride_id, incident_id])
