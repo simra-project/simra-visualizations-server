@@ -39,6 +39,16 @@ class IncidentViewSet(viewsets.ModelViewSet):
     filter_class = IncidentContainsFilter
     filter_backends = (InBBOXFilter, DjangoFilterBackend)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        ride_id = self.request.GET.get('ride_id')
+        exclude_type = self.request.GET.get('exclude_type')
+        if ride_id:
+            queryset = queryset.filter(ride_id=ride_id)
+        if exclude_type:
+            queryset = queryset.exclude(incident=exclude_type)
+        return queryset
+
     @method_decorator(cache_page(60 * 60 * 24))
     def dispatch(self, request, *args, **kwargs):
         return super(IncidentViewSet, self).dispatch(request, *args, **kwargs)

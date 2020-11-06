@@ -2,7 +2,7 @@ from stop_service import find_stops_in_raw_coords
 from settings import COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD
 import copy
 from geopy.distance import great_circle
-
+import statistics
 
 def process_velocity(ride):
     slow_sections = find_stops_in_raw_coords(ride, COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD)
@@ -39,6 +39,7 @@ def calc_total_distance(coords):
 
 def calc_ride_sections_relative_velocity(continuous_ride, v_avg):
     ride_sections = []
+    velocities = []
     for i in range(len(continuous_ride.raw_coords)):
         if i + 1 < len(continuous_ride.raw_coords):
             current = continuous_ride.raw_coords[i]
@@ -47,5 +48,10 @@ def calc_ride_sections_relative_velocity(continuous_ride, v_avg):
             if duration == 0:
                 continue
             vel = distance / duration  # in m/s
-            ride_sections.append((current, vel, vel / v_avg))
-    return ride_sections
+            velocities.append(vel)
+            ride_sections.append((current, vel, ))
+    median_vel = statistics.median(velocities)
+    ride_sections_final = []
+    for ride_section in ride_sections:
+        ride_sections_final.append((*ride_section, ride_section[1] / median_vel))
+    return ride_sections_final

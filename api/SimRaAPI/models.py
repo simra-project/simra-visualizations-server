@@ -9,6 +9,15 @@ class ParsedFiles(models.Model):
     importTimestamp = models.DateTimeField(auto_now=True)
 
 
+class Ride(models.Model):
+    timestamps = ArrayField(models.DateTimeField())
+    filename = models.CharField(max_length=32)
+    geom = models.LineStringField()
+    start = models.PointField(null=True)
+    end = models.PointField(null=True)
+    legs = ArrayField(models.BigIntegerField(), default=list)
+
+
 class Incident(models.Model):
     rideTimestamp = models.DateTimeField()
     bikeType = models.IntegerField()
@@ -20,17 +29,9 @@ class Incident(models.Model):
     scary = models.BooleanField()
     desc = models.TextField()
     filename = models.CharField(max_length=32)
+    ride = models.ForeignKey(Ride, on_delete=models.CASCADE, null=True)
 
     geom = models.PointField()
-
-
-class Ride(models.Model):
-    timestamps = ArrayField(models.DateTimeField())
-    filename = models.CharField(max_length=32)
-    geom = models.LineStringField()
-    start = models.PointField(null=True)
-    end = models.PointField(null=True)
-    legs = ArrayField(models.BigIntegerField(), default=list)
 
 
 class RideSegment(models.Model):

@@ -22,7 +22,8 @@ if __name__ == '__main__':
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER count SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER score SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "weekdayCount" SET DEFAULT 0;
-                ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "rushhourCount" SET DEFAULT 0;
+                ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "morning_count" SET DEFAULT 0;
+                ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "evening_count" SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "score_array" SET DEFAULT array[]::float[];
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "velocity" SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "velocity_array" SET DEFAULT array[]::float[];

@@ -14,7 +14,7 @@ class IncidentSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Incident
         geo_field = 'geom'
-        fields = ('rideTimestamp', 'bikeType', 'childCheckbox', 'trailerCheckbox', 'pLoc', 'incident', 'iType', 'scary', 'desc', 'filename')
+        fields = ('rideTimestamp', 'bikeType', 'childCheckbox', 'trailerCheckbox', 'pLoc', 'incident', 'iType', 'scary', 'desc', 'filename', 'ride_id')
 
 
 class ParsedFilesSerializer(ModelSerializer):
@@ -27,5 +27,5 @@ class LegSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = OsmWaysLegs
         geo_field = 'geom'
-        fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'rushhourCount')
+        fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'morning_count', 'evening_count')
 
