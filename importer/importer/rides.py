@@ -44,16 +44,27 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
             raw_coords.append([float(row["lon"]), float(row["lat"])])
             try:
                 if row["acc"]:
+                    if float(row["acc"]) > 100.0:  # ride goes to trash
+                        print("Ride is filtered due to accuracies > 100m")
+                        return
                     accuracies.append(float(row["acc"]))
             except KeyError:
                 return
             timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))  # timeStamp is in Java TS Format
-        if row["X"]:
-            accelerations.append((float(row["X"]), float(row["Y"]), float(row["Z"]),
-                                  datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000), raw_coords[-1]))
+        try:
+            if row["X"]:
+                accelerations.append((float(row["X"]), float(row["Y"]), float(row["Z"]),
+                                      datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000), raw_coords[-1]))
+        except TypeError:
+            return
     ride = Ride(raw_coords, accuracies, timestamps)
 
     if len(ride.raw_coords) == 0:
+        print("Ride is filtered due to len(coords) == 0")
+        return
+
+    if is_teleportation(ride.timestamps):
+        print("Ride is filtered due to teleportation")
         return
 
     IRI, ride_sections = surface_quality_service.process_surface(ride, accelerations)
@@ -92,7 +103,7 @@ INSERT INTO public."SimRaAPI_ridesegment" (geom, score) VALUES (%s, %s)
             INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
         """, [ls, timestamps, [i[0] for i in legs], filename, start, end])
         ride_id = cur.fetchone()[0]
-        incidents.update_ride_ids([i[2] for i in incident_locs], ride_id)
+        incidents.update_ride_ids([i[2] for i in incident_locs], ride_id, cur)
 
     except:
         print(f"Problem parsing {filename}")
@@ -103,6 +114,14 @@ if __name__ == '__main__':
     filepath = "../csvdata/Berlin/Rides/VM2_-351907452"
     with DatabaseConnection() as cur:
         handle_ride_file(filepath, cur)
+
+
+def is_teleportation(timestamps):
+    for i, t in enumerate(timestamps):
+        if i + 1 < len(timestamps):
+            if (timestamps[i + 1] - timestamps[i]).seconds > 20:
+                return True
+    return False
 
 
 class Ride:

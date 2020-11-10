@@ -39,5 +39,5 @@ def handle_incidents(data, filename, cur):
 def update_ride_ids(incident_ids, ride_id, cur):
     for incident_id in incident_ids:
         cur.execute("""
-                    UPDATE public."SimRaAPI_incident" SET rideId = %s WHERE id = %s
+                    UPDATE public."SimRaAPI_incident" SET ride_id = %s WHERE id = %s
                 """, [ride_id, incident_id])
