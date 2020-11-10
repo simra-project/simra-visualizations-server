@@ -8,11 +8,11 @@
     <Style name="incident">
             <Rule>
             <Filter>[scary] = true</Filter>
-            <MarkersSymbolizer fill="#e70101" stroke-width="0.0"/>
+            <MarkersSymbolizer fill="#9e1a16" stroke-width="0.0"/>
         </Rule>
             <Rule>
             <Filter>[scary] = false</Filter>
-            <MarkersSymbolizer fill="#000000" stroke-width="0.0"/>
+            <MarkersSymbolizer fill="#32c0dc" stroke-width="0.0"/>
         </Rule>
     </Style>
     <Layer name="rides" srs="+proj=latlong">
