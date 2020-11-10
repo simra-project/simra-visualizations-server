@@ -1,6 +1,6 @@
 import csv
 
-from datetime import date
+from datetime import datetime
 from postgis import Point
 
 
@@ -10,7 +10,7 @@ def handle_incidents(data, filename, cur):
     pLoc = -1
     incidents = []
     for row in data:
-        rideTimestamp = date.fromtimestamp(int(row.get("ts", 0)) / 1000)
+        rideTimestamp = datetime.utcfromtimestamp(int(row.get("ts", 0)) / 1000)
         bikeType = row.get("bike", -1)
         childCheckbox = row.get("childCheckBox", 0) == "1"
         trailerCheckbox = row.get("trailerCheckBox", 0) == "1"
