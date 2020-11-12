@@ -18,6 +18,20 @@ class Ride(models.Model):
     legs = ArrayField(models.BigIntegerField(), default=list)
 
 
+class Profile(models.Model):
+    birth = models.IntegerField()
+    gender = models.IntegerField()
+    region = models.IntegerField()
+    experience = models.IntegerField()
+    numberOfRides = models.IntegerField()
+    duration = models.IntegerField()
+    numberOfIncidents = models.IntegerField()
+    length = models.IntegerField()
+    idle = models.IntegerField()
+    behaviour = models.IntegerField()
+    numberOfScary = models.IntegerField()
+
+
 class Incident(models.Model):
     rideTimestamp = models.DateTimeField()
     bikeType = models.IntegerField()
