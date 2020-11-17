@@ -12,6 +12,7 @@ from django.db import connection
 from django.http import HttpResponse
 
 import memcache
+import json
 
 memcache.SERVER_MAX_VALUE_LENGTH = 1024 * 1024 * 100
 
@@ -163,4 +164,4 @@ def get_statistics(request, region):
             WHERE region = %s) i
                 ''', [region, region])
         columns = [col[0] for col in cursor.description]
-        return HttpResponse([dict(zip(columns, row)) for row in cursor.fetchall()])
+        return HttpResponse(json.dumps([dict(zip(columns, row)) for row in cursor.fetchall()][0]), content_type = 'application/json; charset=utf8')
