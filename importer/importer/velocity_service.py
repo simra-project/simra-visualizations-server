@@ -4,15 +4,17 @@ import copy
 from geopy.distance import great_circle
 import statistics
 
+
 def process_velocity(ride):
     slow_sections = find_stops_in_raw_coords(ride, COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD)
     continuous_ride = remove_slow_sections(ride, slow_sections)
-    total_distance = calc_total_distance(continuous_ride.raw_coords)
-    total_duration = (continuous_ride.timestamps[-1] - continuous_ride.timestamps[0]).seconds
+    try:
+        total_duration = (continuous_ride.timestamps[-1] - continuous_ride.timestamps[0]).seconds
+    except IndexError:
+        return
     if total_duration == 0:
         return
-    v_avg = total_distance / total_duration
-    ride_sections = calc_ride_sections_relative_velocity(continuous_ride, v_avg)
+    ride_sections = calc_ride_sections_relative_velocity(continuous_ride)
     return ride_sections
 
 
@@ -37,19 +39,20 @@ def calc_total_distance(coords):
     return total_dist
 
 
-def calc_ride_sections_relative_velocity(continuous_ride, v_avg):
+def calc_ride_sections_relative_velocity(continuous_ride):
     ride_sections = []
     velocities = []
     for i in range(len(continuous_ride.raw_coords)):
         if i + 1 < len(continuous_ride.raw_coords):
             current = continuous_ride.raw_coords[i]
+            next = continuous_ride.raw_coords[i + 1]
             distance = great_circle(continuous_ride.raw_coords[i], continuous_ride.raw_coords[i + 1]).meters
             duration = (continuous_ride.timestamps[i + 1] - continuous_ride.timestamps[i]).seconds
             if duration == 0:
                 continue
             vel = distance / duration  # in m/s
             velocities.append(vel)
-            ride_sections.append((current, vel, ))
+            ride_sections.append(([current, next], vel,))
     median_vel = statistics.median(velocities)
     ride_sections_final = []
     for ride_section in ride_sections:

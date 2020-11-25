@@ -124,7 +124,7 @@ def update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_loc
     for vel_section in velocity_sections:
         cur.execute("""
                     SELECT id, ST_Distance(geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)) as d FROM legs_to_match ORDER BY d ASC LIMIT 1
-                """, (vel_section[0][0], vel_section[0][1]))
+                """, (vel_section[0][0][0], vel_section[0][0][1]))
         candidates = cur.fetchall()
         for candidate in candidates:
             if candidate[0] in list(df["id"]):

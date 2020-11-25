@@ -67,8 +67,8 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         print("Ride is filtered due to teleportation")
         return
 
-    IRI, ride_sections = surface_quality_service.process_surface(ride, accelerations)
-    velocity_sections = velocity_service.process_velocity(ride)
+    IRI, ride_sections_surface = surface_quality_service.process_surface(ride, accelerations)
+    ride_sections_velocity = velocity_service.process_velocity(ride)
 
     ride = filters.apply_smoothing_filters(ride)
     if filters.apply_removal_filters(ride):
@@ -79,7 +79,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         return
 
     legs = leg_service.determine_legs(map_matched, cur)
-    leg_service.update_legs(ride, legs, cur, IRI, phone_loc, velocity_sections, incident_locs)
+    leg_service.update_legs(ride, legs, cur, IRI, phone_loc, ride_sections_velocity, incident_locs)
 
     stop_service.process_stops(ride, legs, cur)
 
@@ -92,12 +92,18 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         print("Phone is on Handlebar, finding road surface quality")
         try:
             cur.executemany("""
-INSERT INTO public."SimRaAPI_ridesegment" (geom, score) VALUES (%s, %s)
-            """, ride_sections)
+    INSERT INTO public."SimRaAPI_ridesegmentsurface" (geom, score) VALUES (%s, %s)
+            """, ride_sections_surface)
         except Exception as e:
-            print("Can't create ride segments.")
+            print("Can't create surface ride segments.")
             raise (e)
-
+    try:
+        cur.executemany("""
+    INSERT INTO public."SimRaAPI_ridesegmentvelocity" (geom, velocity) VALUES (%s, %s)
+                """, list(map(lambda x: (LineString(x[0], srid=4326), x[2]), ride_sections_velocity)))
+    except Exception as e:
+        print("Can't create velocity ride segments.")
+        raise (e)
     try:
         cur.execute("""
             INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
