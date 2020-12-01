@@ -93,6 +93,12 @@ def get_regions(request):
         return HttpResponse(json.dumps(cursor.fetchall()[0]), content_type='application/json; charset=utf8')
 
 
+def get_regions(request):
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT DISTINCT("regionSpoken") FROM "SimRaAPI_profile"')
+        return HttpResponse(json.dumps(cursor.fetchall()[0]), content_type='application/json; charset=utf8')
+
+
 def get_statistics(request, region):
     with connection.cursor() as cursor:
         cursor.execute('''

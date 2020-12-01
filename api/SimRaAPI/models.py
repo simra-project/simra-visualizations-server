@@ -49,9 +49,14 @@ class Incident(models.Model):
     geom = models.PointField()
 
 
-class RideSegment(models.Model):
+class RideSegmentSurface(models.Model):
     geom = models.LineStringField()
     score = models.FloatField()
+
+
+class RideSegmentVelocity(models.Model):
+    geom = models.LineStringField()
+    velocity = models.FloatField()
 
 
 class OsmWaysJunctions(models.Model):
