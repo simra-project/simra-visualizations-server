@@ -6,7 +6,7 @@
         </Rule>
     </Style>
     <Style name="incident">
-            <Rule>
+        <Rule>
             <Filter>[scary] = true</Filter>
             <MarkersSymbolizer fill="#9e1a16" stroke-width="0.0"/>
         </Rule>
