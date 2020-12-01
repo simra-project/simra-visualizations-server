@@ -22,6 +22,7 @@ class Profile(models.Model):
     birth = models.IntegerField()
     gender = models.IntegerField()
     region = models.IntegerField()
+    regionSpoken = models.CharField(max_length=32, default="unknown")
     experience = models.IntegerField()
     numberOfRides = models.IntegerField()
     duration = models.IntegerField()
