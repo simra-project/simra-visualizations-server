@@ -55,7 +55,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
             if row["X"]:
                 accelerations.append((float(row["X"]), float(row["Y"]), float(row["Z"]),
                                       datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000), raw_coords[-1]))
-        except TypeError:
+        except Exception:#TypeError:
             return
     ride = Ride(raw_coords, accuracies, timestamps)
 
