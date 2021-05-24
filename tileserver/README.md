@@ -11,11 +11,12 @@ Create a symlink to the `mapnik_config` directory: `ln -s /var/simra/SimRa2/tile
 
 ## Tirex tiles
 
-Create folders for each config file in `/tileserver/mapnik_config/`, e.g. `/var/lib/tirex/tiles/simra_rides_density`.  
+Create the folders `/var/lib/tirex/` and `/var/lib/tirex/tiles/`. Then, create folders in `/var/lib/tirex/tiles/` for each config file in `/tileserver/mapnik_config/`, e.g. `/var/lib/tirex/tiles/simra_rides_density`.  
 Now set permissions via `chown tirex:tirex -R /var/lib/tirex`.  
 
 ## Services
 
-Copy service files to `/etc/systemd/service/`.  
-Create folder `/var/run/tirex` with `permissions tirex:tirex`.  
-Update `/etc/tirex/renderer : plugindir` should be `/usr/local/lib/mapnik/input`, `fontdir=/usr/local/lib/mapnik/fonts`.  
+Create the folder `/etc/systemd/service/` and copy the service files `tirex-backend-manager.service` and `tirex-master.service` (inside `/tileserver/config/`) into it. (For Arch linux copy the service files into `/etc/systemd/system/`.)  
+
+Then, create the folder `/var/run/tirex` with permissions: `sudo chown tirex:tirex -R /var/run/tirex`.  
+Last, update `/etc/tirex/renderer/mapnik.conf`: `plugindir` should be `/usr/local/lib/mapnik/input` and `fontdir` should be `/usr/local/lib/mapnik/fonts`.  
