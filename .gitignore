@@ -2,3 +2,6 @@ __pycache__/
 csvdata/*
 *.zip
 .idea
+/importer/build/
+/importer/dist/
+/importer/SimRa_Importer.egg-info
