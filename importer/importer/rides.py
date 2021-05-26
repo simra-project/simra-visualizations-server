@@ -1,3 +1,25 @@
+"""Application logic to import ride entities from a CSV file.
+
+Returns
+-------
+nothing
+
+Raises
+------
+Exception
+    [description]
+
+Methods
+-------
+handle_ride_file()
+handle_ride()
+is_teleportation()
+
+Classes
+-------
+Ride
+"""
+
 import incidents
 import csv
 from postgis import LineString, Point
@@ -13,6 +35,16 @@ import settings
 
 
 def handle_ride_file(filename, cur):
+    """Splits up a CSV file into incidents and ride coordinates and
+        calls the respective methods to process them further.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the CSV file the ride is saved in.
+    cur : DatabaseConnection
+    """
+
     with open(filename, "r") as f:
         incident_list = []
         ride = []
@@ -34,6 +66,23 @@ def handle_ride_file(filename, cur):
 
 
 def handle_ride(data, filename, cur, phone_loc, incident_locs):
+    """Reads all relevant data from a CSV file and persists the corresponding
+    data regarding the ride in the database.
+
+    Parameters
+    ----------
+    data : str[ ]
+        Data entries of the CSV file describing the ride.
+    filename : str
+        Name of the CSV file where the ride is saved in.
+    cur : DatabaseConnection
+    phone_loc : bool
+        1, if the phone was attached to the handlebar, 0 otherwise.
+        If 1, street quality can be calculated from the sensor data.
+    incident_locs :
+        TODO:
+    """
+
     data = csv.DictReader(data[1:], delimiter=",")
 
     raw_coords = []
@@ -145,12 +194,25 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
 
 
 if __name__ == "__main__":
-    filepath = "../csvdata/Berlin/Rides/VM2_-351907452"
+    """Executed when invoked directly"""
+    filepath = "../csvdata/Berlin/Rides/VM2_-351907452"  # TODO: Purpose for testing?
     with DatabaseConnection() as cur:
         handle_ride_file(filepath, cur)
 
 
 def is_teleportation(timestamps):
+    """
+    Parameters
+    ----------
+    timestamps : datetime[ ]
+        Time stamps of coordinate measurements of the ride.
+
+    Returns
+    -------
+    bool
+        Whether the users phone 'teleported' during the ride.
+    """
+
     for i, t in enumerate(timestamps):
         if i + 1 < len(timestamps):
             if (timestamps[i + 1] - timestamps[i]).seconds > 20:
@@ -159,7 +221,17 @@ def is_teleportation(timestamps):
 
 
 class Ride:
+    """A class used to represent a bicycle ride."""
+
     def __init__(self, raw_coords, accuracies, timestamps):
+        """
+        Parameters
+        ----------
+        raw_coords
+            The coordinates of the trajectory.
+        accuracies
+        timestamps
+        """
         self.raw_coords = raw_coords
         self.raw_coords_filtered = None
         self.accuracies = accuracies
