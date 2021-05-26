@@ -4,21 +4,25 @@ from db_connection import DatabaseConnection
 import datetime
 import tqdm
 import sys
-import profile, rides
+import profile
+import rides
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with DatabaseConnection() as cur:
         print(f"[*] Inserting data into OsmWaysJunctions")
-        cur.execute("""
+        cur.execute(
+            """
                     INSERT INTO public."SimRaAPI_osmwaysjunctions" (point)
 		    SELECT ST_Transform((ST_DumpPoints(geometry)).geom, 4326) AS point
 		    FROM import.osm_ways
                     GROUP BY point
                     HAVING count(*) >= 2
-                    """)
+                    """
+        )
         print(f"[+] Success")
         print(f"[*] Inserting data into OsmWaysLegs")
-        cur.execute("""
+        cur.execute(
+            """
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER count SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER score SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "weekdayCount" SET DEFAULT 0;
@@ -29,8 +33,10 @@ if __name__ == '__main__':
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "score_array" SET DEFAULT array[]::float[];
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "velocity" SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmwayslegs" ALTER "velocity_array" SET DEFAULT array[]::float[];
-                """)
-        cur.execute("""
+                """
+        )
+        cur.execute(
+            """
         INSERT INTO public."SimRaAPI_osmwayslegs" ("osmId", "geom", "streetName", "postalCode", "highwayName")
             SELECT osm_id,
             (ST_Dump(ST_Split(
@@ -48,19 +54,23 @@ if __name__ == '__main__':
             street_name,
             postal_code,
             highway_type;
-                    """)
+                    """
+        )
 
         print(f"[+] Success")
-        
+
         print(f"[*] Inserting data into OsmLargeJunctions")
 
-        cur.execute("""
+        cur.execute(
+            """
                 ALTER TABLE public."SimRaAPI_osmlargejunctions" ALTER count SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmlargejunctions" ALTER "totalDuration" SET DEFAULT 0;
                 ALTER TABLE public."SimRaAPI_osmlargejunctions" ALTER "avgDuration" SET DEFAULT 0;
-                """)
+                """
+        )
 
-        cur.execute("""
+        cur.execute(
+            """
 INSERT INTO public."SimRaAPI_osmlargejunctions" (point)
     SELECT st_transform((ST_DumpPoints(geom)).geom, 4326) AS point
     FROM public."SimRaAPI_osmwayslegs"
@@ -75,9 +85,10 @@ INSERT INTO public."SimRaAPI_osmlargejunctions" (point)
     GROUP BY point
     HAVING count(*) >= 3
 
-                """)
+                """
+        )
 
         print(f"[+] Success")
-        #"""
+        # """
         #        SELECT * FROM public."SimRaAPI_parsedfiles" WHERE "fileName" LIKE %s
         #    """, (f'%{filename}%', ))

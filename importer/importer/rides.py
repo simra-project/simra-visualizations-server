@@ -13,7 +13,7 @@ import settings
 
 
 def handle_ride_file(filename, cur):
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         incident_list = []
         ride = []
         split_found = False
@@ -25,7 +25,9 @@ def handle_ride_file(filename, cur):
                 incident_list.append(line)
             else:
                 ride.append(line)
-        phone_loc, incident_locs = incidents.handle_incidents(incident_list, filename, cur)
+        phone_loc, incident_locs = incidents.handle_incidents(
+            incident_list, filename, cur
+        )
         if settings.GET_ALL_SURFACE_SCORES:
             phone_loc = "1"
         handle_ride(ride, filename, cur, phone_loc, incident_locs)
@@ -50,12 +52,20 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
                     accuracies.append(float(row["acc"]))
             except KeyError:
                 return
-            timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))  # timeStamp is in Java TS Format
+            # timeStamp is in Java TS Format
+            timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))
         try:
             if row["X"]:
-                accelerations.append((float(row["X"]), float(row["Y"]), float(row["Z"]),
-                                      datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000), raw_coords[-1]))
-        except Exception:#TypeError:
+                accelerations.append(
+                    (
+                        float(row["X"]),
+                        float(row["Y"]),
+                        float(row["Z"]),
+                        datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000),
+                        raw_coords[-1],
+                    )
+                )
+        except Exception:  # TypeError:
             return
     ride = Ride(raw_coords, accuracies, timestamps)
 
@@ -67,7 +77,9 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         print("Ride is filtered due to teleportation")
         return
 
-    IRI, ride_sections_surface = surface_quality_service.process_surface(ride, accelerations)
+    IRI, ride_sections_surface = surface_quality_service.process_surface(
+        ride, accelerations
+    )
     ride_sections_velocity = velocity_service.process_velocity(ride)
 
     ride = filters.apply_smoothing_filters(ride)
@@ -79,7 +91,9 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         return
 
     legs = leg_service.determine_legs(map_matched, cur)
-    leg_service.update_legs(ride, legs, cur, IRI, phone_loc, ride_sections_velocity, incident_locs)
+    leg_service.update_legs(
+        ride, legs, cur, IRI, phone_loc, ride_sections_velocity, incident_locs
+    )
 
     stop_service.process_stops(ride, legs, cur)
 
@@ -91,23 +105,37 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     if phone_loc == 1 or phone_loc == "1":  # Handlebar
         print("Phone is on Handlebar, finding road surface quality")
         try:
-            cur.executemany("""
+            cur.executemany(
+                """
     INSERT INTO public."SimRaAPI_ridesegmentsurface" (geom, score) VALUES (%s, %s)
-            """, ride_sections_surface)
+            """,
+                ride_sections_surface,
+            )
         except Exception as e:
             print("Can't create surface ride segments.")
             raise (e)
     try:
-        cur.executemany("""
+        cur.executemany(
+            """
     INSERT INTO public."SimRaAPI_ridesegmentvelocity" (geom, velocity) VALUES (%s, %s)
-                """, list(map(lambda x: (LineString(x[0], srid=4326), x[2]), ride_sections_velocity)))
+                """,
+            list(
+                map(
+                    lambda x: (LineString(x[0], srid=4326), x[2]),
+                    ride_sections_velocity,
+                )
+            ),
+        )
     except Exception as e:
         print("Can't create velocity ride segments.")
         raise (e)
     try:
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
-        """, [ls, timestamps, [i[0] for i in legs], filename, start, end])
+        """,
+            [ls, timestamps, [i[0] for i in legs], filename, start, end],
+        )
         ride_id = cur.fetchone()[0]
         incidents.update_ride_ids([i[2] for i in incident_locs], ride_id, cur)
 
@@ -116,7 +144,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         raise Exception("Can not parse ride!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     filepath = "../csvdata/Berlin/Rides/VM2_-351907452"
     with DatabaseConnection() as cur:
         handle_ride_file(filepath, cur)
