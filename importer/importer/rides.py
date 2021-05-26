@@ -90,6 +90,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     timestamps = []
     accelerations = []
 
+    # Process the CSV file line by line and save into the variable ride
     for row in data:
         if row["lat"]:
             raw_coords.append([float(row["lon"]), float(row["lat"])])
@@ -118,12 +119,13 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
             return
     ride = Ride(raw_coords, accuracies, timestamps)
 
+    # Start of filter pipeline =======>
     if len(ride.raw_coords) == 0:
-        print("Ride is filtered due to len(coords) == 0")
+        settings.logging.info("Ride is filtered due to len(coords) == 0")
         return
 
     if is_teleportation(ride.timestamps):
-        print("Ride is filtered due to teleportation")
+        settings.logging.info("Ride is filtered due to teleportation")
         return
 
     IRI, ride_sections_surface = surface_quality_service.process_surface(
@@ -134,25 +136,33 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     ride = filters.apply_smoothing_filters(ride)
     if filters.apply_removal_filters(ride):
         return
+    # <------- End of filter pipeline
 
+    # Map match the data
     map_matched = map_match_service.map_match(ride)
     if len(map_matched) == 0:
         return
 
-    legs = leg_service.determine_legs(map_matched, cur)
-    leg_service.update_legs(
-        ride, legs, cur, IRI, phone_loc, ride_sections_velocity, incident_locs
-    )
-
-    stop_service.process_stops(ride, legs, cur)
-
+    # Determine remaining attributes
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
 
     start = Point(ride.raw_coords_filtered[0], srid=4326)
     end = Point(ride.raw_coords_filtered[-1], srid=4326)
+
+    # Start of entity processing pipeline =======>
+    # Process legs from the rides data
+    legs = leg_service.determine_legs(map_matched, cur)
+    leg_service.update_legs(
+        ride, legs, cur, IRI, phone_loc, ride_sections_velocity, incident_locs
+    )
+
+    # Process trajectory stops
+    stop_service.process_stops(ride, legs, cur)
+
+    # Create surface ride segments
     if phone_loc == 1 or phone_loc == "1":  # Handlebar
-        print("Phone is on Handlebar, finding road surface quality")
+        settings.logging.info("Phone is on Handlebar, finding road surface quality")
         try:
             cur.executemany(
                 """
@@ -161,8 +171,10 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
                 ride_sections_surface,
             )
         except Exception as e:
-            print("Can't create surface ride segments.")
+            settings.logging.exception("Can't create surface ride segments.")
             raise (e)
+
+    # Create velocity ride segments
     try:
         cur.executemany(
             """
@@ -176,8 +188,17 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
             ),
         )
     except Exception as e:
-        print("Can't create velocity ride segments.")
+        settings.logging.exception("Can't create velocity ride segments.")
         raise (e)
+
+    # Process shortest path
+    # TODO: Process shortest path in a service
+
+    # Process street segement popularity
+    # TODO: Process street segment popularity in a service
+    # <------- End of entity processing pipeline
+
+    # Save the ride into the database
     try:
         cur.execute(
             """
@@ -189,7 +210,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         incidents.update_ride_ids([i[2] for i in incident_locs], ride_id, cur)
 
     except:
-        print(f"Problem parsing {filename}")
+        settings.logging.exception(f"Problem parsing {filename}")
         raise Exception("Can not parse ride!")
 
 
