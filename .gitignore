@@ -5,3 +5,4 @@ csvdata/*
 /importer/build/
 /importer/dist/
 /importer/SimRa_Importer.egg-info
+/api/SimRaAPI/migrations/
