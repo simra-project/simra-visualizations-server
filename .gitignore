@@ -1,7 +1,11 @@
 __pycache__/
 csvdata/*
 *.zip
+
+# IDE settings
 .idea
+.vscode
+
 /importer/build/
 /importer/dist/
 /importer/SimRa_Importer.egg-info

@@ -49,6 +49,8 @@ class Ride(models.Model):
         The name of the CSV file the ride was imported from.
     geom : LineStringField
         Raw GPS data of the ride.
+    shortest_path : LineStringField
+        The shortest path from start to end point.
     start : PointField
         The coordinate the trajectory was started from.
     end : PointField
@@ -60,6 +62,7 @@ class Ride(models.Model):
     timestamps = ArrayField(models.DateTimeField())
     filename = models.CharField(max_length=32)
     geom = models.LineStringField()
+    shortest_path = models.LineStringField()
     start = models.PointField(null=True)
     end = models.PointField(null=True)
     legs = ArrayField(models.BigIntegerField(), default=list)
