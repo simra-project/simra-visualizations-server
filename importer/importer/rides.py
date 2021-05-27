@@ -22,11 +22,13 @@ Ride
 
 import incidents
 import csv
+import os
 from postgis import LineString, Point
 from datetime import datetime
 from db_connection import DatabaseConnection
 import filters
 import map_match_service
+import shortest_path_service
 import leg_service
 import stop_service
 import velocity_service
@@ -144,6 +146,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         return
 
     # Determine remaining attributes
+    settings.logging.info(ride.raw_coords_filtered)
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
 
@@ -192,7 +195,9 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         raise (e)
 
     # Process shortest path
-    # TODO: Process shortest path in a service
+    # shortest_path =
+    sp = shortest_path_service.query_shortest_path_server(start, end)
+    shortest_path = LineString(sp, srid=4326)
 
     # Process street segement popularity
     # TODO: Process street segment popularity in a service
@@ -202,9 +207,9 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     try:
         cur.execute(
             """
-            INSERT INTO public."SimRaAPI_ride" (geom, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
-        """,
-            [ls, timestamps, [i[0] for i in legs], filename, start, end],
+            INSERT INTO public."SimRaAPI_ride" (geom, shortest_path, timestamps, legs, filename, "start", "end") VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
+            """,
+            [ls, shortest_path, timestamps, [i[0] for i in legs], filename, start, end],
         )
         ride_id = cur.fetchone()[0]
         incidents.update_ride_ids([i[2] for i in incident_locs], ride_id, cur)
@@ -212,13 +217,6 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     except:
         settings.logging.exception(f"Problem parsing {filename}")
         raise Exception("Can not parse ride!")
-
-
-if __name__ == "__main__":
-    """Executed when invoked directly"""
-    filepath = "../csvdata/Berlin/Rides/VM2_-351907452"  # TODO: Purpose for testing?
-    with DatabaseConnection() as cur:
-        handle_ride_file(filepath, cur)
 
 
 def is_teleportation(timestamps):
@@ -258,3 +256,18 @@ class Ride:
         self.accuracies = accuracies
         self.timestamps = timestamps
         self.timestamps_filtered = None
+
+
+if __name__ == "__main__":
+    """Executed when invoked directly. Only for testing purposes.
+
+    Attention: Will result in multiple database entries for the same
+    ride if executed more than once!
+    """
+
+    dirname = os.path.dirname(os.path.dirname(__file__))
+    filepath = os.path.join(dirname, "resources/csvdata/Berlin/Rides/VM2_493290084")
+    settings.logging.info(f"Testing the module with {filepath}")
+
+    with DatabaseConnection() as cur:
+        handle_ride_file(filepath, cur)
