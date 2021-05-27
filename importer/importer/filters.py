@@ -12,7 +12,7 @@ apply_removal_filters()
     apply_user_forgot_to_stop_filter()
 """
 
-from importer.settings import *
+from settings import *
 from rdp import rdp
 from geopy.distance import great_circle
 

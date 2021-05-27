@@ -1,6 +1,9 @@
 import logging
+
 # Possible debug levels are CRITICAL, ERROR, WARNING, INFO and DEBUG.
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG, format="%(levelname)s - %(module)s - %(message)s"
+)
 
 IMPORT_DIRECTORY = "/var/simra/csvdata"
 DB_HOST = "127.0.0.1"
@@ -9,7 +12,7 @@ DB_USER = "simra"
 DB_PASSWORD = "simra12345simra"
 DB_PORT = 5432
 
-MIN_ACCURACY = float('inf')
+MIN_ACCURACY = float("inf")
 RDP_EPSILON = 0.000005
 
 MIN_RIDE_DISTANCE = 200  # in meters
@@ -20,8 +23,10 @@ MIN_DISTANCE_TO_COVER_IN_5_MIN = 100  # in meters
 COVERED_DISTANCE_INSIDE_STOP_THRESHOLD = 0.5  # in meters
 DISTANCE_TO_JUNCTION_THRESHOLD = 30  # in meters
 
-COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD = 4.2  # in meters. ≈ 5km/h with a resolution of 1coord/3secs
+COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD = (
+    4.2  # in meters. ≈ 5km/h with a resolution of 1coord/3secs
+)
 
 GET_ALL_SURFACE_SCORES = False
 
-logging.info('Loaded settings.py for the importer.')
+logging.info("Loaded for importer")

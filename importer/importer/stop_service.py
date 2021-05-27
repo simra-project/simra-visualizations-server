@@ -111,7 +111,6 @@ def match_junction_to_stop(stop, cur):
 
 
 def update_junction(junction, new_duration, cur):
-    logging.debug(junction)
     count = junction[1] + 1
     cum_duration = junction[2] + new_duration
     avg_duration = cum_duration / count
