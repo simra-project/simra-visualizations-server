@@ -213,6 +213,12 @@ class OsmWaysLegs(models.Model):
     eveningCount : IntegerField
     normalIncidentCount : IntegerField
     scaryIncidentCount : IntegerField
+    avoidedCount : IntegerField
+        Number of times the leg was not used by a cyclist even though
+        it would have been the shortest route.
+    chosenCount : IntegerField
+        Number of times the leg was chosen by a cyclist even though
+        there existed a shorter path which could have been chosen.
     """
 
     osmId = models.BigIntegerField()
@@ -230,6 +236,8 @@ class OsmWaysLegs(models.Model):
     eveningCount = models.IntegerField(default=0)
     normalIncidentCount = models.IntegerField(default=0)
     scaryIncidentCount = models.IntegerField(default=0)
+    avoidedCount = models.IntegerField(default=0)
+    chosenCount = models.IntegerField(default=0)
 
 
 class OsmLargeJunctions(models.Model):
