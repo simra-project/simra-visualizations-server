@@ -204,11 +204,9 @@ def update_legs(
     chosen = list(
         filter(lambda sleg: True if sleg not in shortest_path_legs else False, legs)
     )
-    idx = 0
-    for leg in legs:
+    for idx, leg in enumerate(legs):
         if leg in chosen:
-            df.at[i, "chosen_count"] += 1
-        idx += 1
+            df.at[idx, "chosen_count"] += 1
 
     # Create a temporary table to buffer updated leg information
     cur.execute(
@@ -403,29 +401,18 @@ def update_avoided_legs(avoided_legs, cur):
     cur : DatabaseConnection
     """
 
-    # Current state of the OSM service legs
-    df = pd.DataFrame(
-        data=avoided_legs,
-        index=range(len(avoided_legs)),
-        columns=[
-            "id",
-            "osm_id",
-            "geometry",
-            "street_name",
-            "count",
-            "score",
-            "weekday_count",
-            "morning_count",
-            "evening_count",
-            "score_array",
-            "velocity",
-            "velocity_array",
-            "normal_incident_count",
-            "scary_incident_count",
-            "avoided_count",
-            "chosen_count",
-        ],
-    )
+    for leg in avoided_legs:
+        leg_avoided_count = leg[14] + 1
+        leg_id = leg[0]
+
+        cur.execute(
+            """
+            UPDATE public."SimRaAPI_osmwayslegs"
+            SET "avoidedCount" = %s
+            WHERE public."SimRaAPI_osmwayslegs".id = %s;
+            """,
+            (leg_avoided_count, leg_id),
+        )
 
 
 def is_weekday(timestamps):
