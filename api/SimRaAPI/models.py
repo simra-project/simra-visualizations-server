@@ -49,6 +49,8 @@ class Ride(models.Model):
         The name of the CSV file the ride was imported from.
     geom : LineStringField
         Raw GPS data of the ride.
+    shortest_path : LineStringField
+        The shortest path from start to end point.
     start : PointField
         The coordinate the trajectory was started from.
     end : PointField
@@ -60,6 +62,7 @@ class Ride(models.Model):
     timestamps = ArrayField(models.DateTimeField())
     filename = models.CharField(max_length=32)
     geom = models.LineStringField()
+    shortest_path = models.LineStringField()
     start = models.PointField(null=True)
     end = models.PointField(null=True)
     legs = ArrayField(models.BigIntegerField(), default=list)
@@ -210,6 +213,12 @@ class OsmWaysLegs(models.Model):
     eveningCount : IntegerField
     normalIncidentCount : IntegerField
     scaryIncidentCount : IntegerField
+    avoidedCount : IntegerField
+        Number of times the leg was not used by a cyclist even though
+        it would have been the shortest route.
+    chosenCount : IntegerField
+        Number of times the leg was chosen by a cyclist even though
+        there existed a shorter path which could have been chosen.
     """
 
     osmId = models.BigIntegerField()
@@ -227,6 +236,8 @@ class OsmWaysLegs(models.Model):
     eveningCount = models.IntegerField(default=0)
     normalIncidentCount = models.IntegerField(default=0)
     scaryIncidentCount = models.IntegerField(default=0)
+    avoidedCount = models.IntegerField(default=0)
+    chosenCount = models.IntegerField(default=0)
 
 
 class OsmLargeJunctions(models.Model):

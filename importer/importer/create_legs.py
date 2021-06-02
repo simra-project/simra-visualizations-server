@@ -7,6 +7,8 @@ import sys
 import profile
 import rides
 
+"""A python module to populate the simra database with leg entities."""
+
 if __name__ == "__main__":
     with DatabaseConnection() as cur:
         print(f"[*] Inserting data into OsmWaysJunctions")
