@@ -6,7 +6,8 @@ import leg_service
 
 
 def query_shortest_path_server(start, end):
-    """[summary]
+    """Retrieves the shortest path between a start and an end point
+    by querying a local graphhopper server.
 
     Parameters
     ----------
@@ -19,5 +20,4 @@ def query_shortest_path_server(start, end):
     headers = {"Content-Type": "application/json"}
     response = requests.get(url, headers=headers)
     coordinates = json.loads(response.text)["paths"][0]["points"]["coordinates"]
-    logging.info(coordinates)
     return coordinates

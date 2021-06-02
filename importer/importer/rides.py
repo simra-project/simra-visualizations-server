@@ -146,7 +146,6 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         return
 
     # Determine remaining attributes
-    settings.logging.info(ride.raw_coords_filtered)
     ls = LineString(ride.raw_coords_filtered, srid=4326)
     filename = filename.split("/")[-1]
 
@@ -154,10 +153,24 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     end = Point(ride.raw_coords_filtered[-1], srid=4326)
 
     # Start of entity processing pipeline =======>
+    # Process shortest path
+    sp = shortest_path_service.query_shortest_path_server(start, end)
+    shortest_path = LineString(sp, srid=4326)
+
     # Process legs from the rides data
+    # Get set of OSM legs blonging to the shortest path of a trajectory
+    shortest_path_legs = leg_service.determine_legs(sp, cur)
+    # Get set of OSM legs belonging to a ride
     legs = leg_service.determine_legs(map_matched, cur)
     leg_service.update_legs(
-        ride, legs, cur, IRI, phone_loc, ride_sections_velocity, incident_locs
+        ride,
+        legs,
+        shortest_path_legs,
+        cur,
+        IRI,
+        phone_loc,
+        ride_sections_velocity,
+        incident_locs,
     )
 
     # Process trajectory stops
@@ -194,13 +207,9 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         settings.logging.exception("Can't create velocity ride segments.")
         raise (e)
 
-    # Process shortest path
-    # shortest_path =
-    sp = shortest_path_service.query_shortest_path_server(start, end)
-    shortest_path = LineString(sp, srid=4326)
-
     # Process street segement popularity
-    # TODO: Process street segment popularity in a service
+    # TODO: Process street segment popularity in a service by calculating some score or so. Maybe
+    # just do it inside the leg_service
     # <------- End of entity processing pipeline
 
     # Save the ride into the database
