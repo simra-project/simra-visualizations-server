@@ -1,23 +1,19 @@
 """Application logic to import ride entities from a CSV file.
 
-Returns
--------
-nothing
-
-Raises
-------
-Exception
-    [description]
-
 Methods
 -------
 handle_ride_file()
+    Splits up a CSV file into incidents and ride coordinates and
+    calls the respective methods to process them further.
 handle_ride()
+    Reads all relevant data from a CSV file and persists the corresponding
+    data regarding the ride in the database.
 is_teleportation()
 
 Classes
 -------
 Ride
+    A class used to represent a bicycle ride.
 """
 
 import incidents
@@ -38,7 +34,7 @@ import settings
 
 def handle_ride_file(filename, cur):
     """Splits up a CSV file into incidents and ride coordinates and
-        calls the respective methods to process them further.
+    calls the respective methods to process them further.
 
     Parameters
     ----------
