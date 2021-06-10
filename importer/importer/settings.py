@@ -29,4 +29,4 @@ COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD = (
 
 GET_ALL_SURFACE_SCORES = False
 
-logging.info("Loaded for importer")
+logging.info("Loaded")
