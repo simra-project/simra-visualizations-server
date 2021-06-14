@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:3857">
+    <Style name="legs" filter-mode="first">
+        <Rule>
+            <LineSymbolizer stroke="[color]" stroke-width="[width]"/>
+        </Rule>
+    </Style>
+    <Layer name="legs" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>legs</StyleName>
+        <Datasource>
+            <Parameter name="type">postgis</Parameter>
+            <Parameter name="host">localhost</Parameter>
+            <Parameter name="dbname">simra</Parameter>
+            <Parameter name="user">simra</Parameter>
+            <Parameter name="password">simra12345simra</Parameter>
+            <Parameter name="table">(
+                select
+                    *,
+                    concat('hsl(', ROUND((240 - (1 - (count / 500.0)) * 50.0)), ', 71%, 53%)') as color,
+                    sqrt(count / 500.0) * 4.5 + 1.5 as width
+                from public."SimRaAPI_osmwayslegs"
+                where count > 0
+            ) t</Parameter>
+        </Datasource>
+    </Layer>
+</Map>
