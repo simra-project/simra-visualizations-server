@@ -5,7 +5,7 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(levelname)s - %(module)s - %(message)s"
 )
 
-IMPORT_DIRECTORY = "/var/simra/csvdata"
+IMPORT_DIRECTORY = "/home/sfuehr/Documents/TUB-WI/S7_BA_SimRa/Monitored_CSV_Data"
 DB_HOST = "127.0.0.1"
 DB_NAME = "simra"
 DB_USER = "simra"
