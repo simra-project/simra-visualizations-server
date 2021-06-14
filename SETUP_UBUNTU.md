@@ -5,7 +5,7 @@
     - [Setup mapnik and tirex](#setup-mapnik-and-tirex)
     - [Setup apache2](#setup-apache2)
     - [Setup mod_tile](#setup-mod_tile)
-    - [Setup django](#setup-django)
+    - [Django & Python](#django--python)
     - [Graphhopper](#graphhopper)
     - [Initial database population](#initial-database-population)
     - [Run the importer](#run-the-importer)
@@ -109,34 +109,64 @@ sudo apt-get install zlib1g-dev clang make pkg-config curl
 source bootstrap.sh
 ./configure CUSTOM_CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" CXX=${CXX} CC=${CC}
 make -j 3 # Uses 3 CPU cores
-make test
+make test # This yields 6 errors if your OS username is not 'simra' but you can ignore them.
 sudo make install
 ```
 
-- Install `python-mapnik`.
-- Install Tirex.
+Install `python-mapnik` by using apt: `sudo apt install python-mapnik`. *Attention!* This could yield errors, as this is probably not meant for mapnik 3.0.x!
+
+Install Tirex by executing the following lines:
+
+```
+# Meet missing dependencies
+sudo apt install devscripts
+
+# Install Perl modules
+cpan IPC::ShareLite JSON GD LWP
+sudo cpan CPAN # Updates to newer cpan
+
+# Install, build and install Tirex
+git clone git@github.com:openstreetmap/tirex.git
+make
+sudo make install
+```
+
+Folders which should exist now: TODO: Remove later.
 - `sudo mkdir /var/lib/tirex/ /var/run/tirex/ /usr/lib/tirex/ /var/log/tirex/ /etx/tirex/`
 - `chown tirex:tirex -R /var/lib/tirex/ /var/run/tirex/ /usr/lib/tirex/ /var/log/tirex/ /etx/tirex/`
 
-(More information can be found [here](https://www.linuxbabe.com/ubuntu/openstreetmap-tile-server-ubuntu-18-04-osm).)
-
 ### Setup apache2
 
-- `yay -S apache`
-- Start apache
+Install the web server by executing `sudo apt install apache2 apache2-dev`. Checking the status of the server with `sudo systemctl status apache2` should yield `active (running)`. If not, start the web server manually via `sudo systemctl start apache2`.
 
 ### Setup mod_tile
 
+This package is a module for the Apache web server. If not done yet, add the OSM PPA to the OS: `sudo add-apt-repository -y ppa:osmadmins/ppa`. Now the installation is possible straight forward by executing `sudo apt-get install -y libapache2-mod-tile`.
+
+TODO: Remove because no longer needed
 - `mkdir /usr/include/iniparser/`
 - `sudo cp /usr/include/iniparser.h /usr/include/iniparser/`
 - `sudo ln -s /var/lib/tirex/tiles /var/lib/mod_tile`
 
-### Setup django
+### Django & Python
 
 Now that the database is set up, we will create database models which will define the form of the database tables which will be filled later. For that, the project uses the django framework which can be installed with pip: `pip install django`.
 
-Next, install all needed dependencies. To do so, execute `sudo apt install libgpgme-dev`.
-Then, execute `pip install -r requirements.txt`.
+Then, execute `pip install -r requirements.txt`. This will run in an error which can be resolved by downgrading the `libpq5` package and installing some more dependencies:
+
+```
+sudo apt install libgpgme-dev python-apt python3-testresources
+sudo apt-get install libpq-dev python-dev pkg-config libcairo2-dev
+sudo apt-get install libpq5=10.17-0ubuntu0.18.04.1
+sudo apt-get install libpq-dev python-dev
+pip install psycopg2
+```
+
+TODO: Can the apt-get commands be executed together?
+
+Now run `pip install -r requirements.txt` again.
+
+*Attention!* `mapnik==3.0.23` was removed from `requirements.txt`. TODO: Put back in there?
 
 Navigate into the `/api/` directory (if necessary, remove `/SimRaAPI/migrations/`) and run:
 
@@ -174,5 +204,7 @@ Now that everything is set up, the data in the database can be rendered into PNG
 Attention, depending on the amount of data which is imported, this process can take a while.
 
 ## List of known issues
+
+For some of the components mentioned above, detailed setup instructions can be found [here](https://ircama.github.io/osm-carto-tutorials/tile-server-ubuntu/).
 
 The directory `/var/run/tirex/` is deleted on every shutdown of the machine. Thus, `sudo mkdir /var/run/tirex/` and `chown tirex:tirex -R /var/run/tirex/` have to be repeated. You can provide a shell script to do so in your autostart directory.
