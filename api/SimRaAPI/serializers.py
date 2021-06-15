@@ -1,5 +1,5 @@
-from serializers import GeoFeatureModelSerializer
-from serializers import ModelSerializer
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework.serializers import ModelSerializer
 from .models import Ride, Incident, ParsedFiles, OsmWaysLegs
 
 

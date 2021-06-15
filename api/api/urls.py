@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import re_path, include, path
 from rest_framework import routers
-from views import (
+from SimRaAPI.views import (
     RideViewSet,
     IncidentViewSet,
     ParsedFilesViewSet,
