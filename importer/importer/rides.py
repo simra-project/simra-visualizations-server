@@ -128,9 +128,14 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         settings.logging.info("Ride is filtered due to teleportation")
         return
 
-    IRI, ride_sections_surface = surface_quality_service.process_surface(
-        ride, accelerations
-    )
+    # TODO: Catch exception
+    try:
+        IRI, ride_sections_surface = surface_quality_service.process_surface(
+            ride, accelerations
+        )
+    except ValueError as e:
+        settings.logging.info("ValueError: Latitude normalization has been prohibited in the newer versions of geopy.")
+        return
     ride_sections_velocity = velocity_service.process_velocity(ride)
 
     ride = filters.apply_smoothing_filters(ride)
@@ -192,8 +197,8 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     try:
         cur.executemany(
             """
-    INSERT INTO public."SimRaAPI_ridesegmentvelocity" (geom, velocity) VALUES (%s, %s)
-                """,
+            INSERT INTO public."SimRaAPI_ridesegmentvelocity" (geom, velocity) VALUES (%s, %s)
+            """,
             list(
                 map(
                     lambda x: (LineString(x[0], srid=4326), x[2]),
