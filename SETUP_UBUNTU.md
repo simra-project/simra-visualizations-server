@@ -12,15 +12,11 @@
     - [Rendering Map Tiles](#rendering-map-tiles)
   - [List of known issues](#list-of-known-issues)
 
-
-
 # Setup on Ubuntu Linux
 
 Latest update: 13.06.2021
 
 This guide describes the project setup for Ubuntu 18.04.
-
-
 
 ## Setup Instructions
 
@@ -54,6 +50,11 @@ Now restart the terminal or execute `source ~/.bashrc` and check whether the ins
 
 (Steps taken from [this](https://stackoverflow.com/questions/63207385/how-do-i-install-pip-for-python-3-8-on-ubuntu-without-changing-any-defaults) tutorial.)
 
+Python packages which have to be installed after (TODO: Add to requirements.txt):
+- `rdp`
+- `geopy`
+- `gpxpy`
+
 ### PostgreSQL Database
 
 Install the database via `sudo apt install postgresql postgresql-contrib`. `psql --version`. should return `10.17`.
@@ -71,6 +72,7 @@ Next, enter the psql command line interface as the user `postgres` to allocate a
 sudo -u postgres psql
 psql=# alter user simra with encrypted password 'simra';
 psql=# grant all privileges on database simra to simra;
+psql=# alter role simra superuser;
 ```
 
 The CLI should return `ALTER ROLE` and `GRANT` as visual feedback when both operations where successful. You can also check whether the database was created by typing `\list` into the psql CLI which will list all databases.
@@ -115,6 +117,13 @@ sudo make install
 
 Install `python-mapnik` by using apt: `sudo apt install python-mapnik`. *Attention!* This could yield errors, as this is probably not meant for mapnik 3.0.x!
 
+For tirex we first need a new user:
+
+```
+sudo useradd -M tirex
+sudo usermod -L tirex
+```
+
 Install Tirex by executing the following lines:
 
 ```
@@ -122,7 +131,7 @@ Install Tirex by executing the following lines:
 sudo apt install devscripts
 
 # Install Perl modules
-cpan IPC::ShareLite JSON GD LWP
+sudo cpan IPC::ShareLite JSON GD LWP
 sudo cpan CPAN # Updates to newer cpan
 
 # Install, build and install Tirex
@@ -131,22 +140,42 @@ make
 sudo make install
 ```
 
-Folders which should exist now: TODO: Remove later.
-- `sudo mkdir /var/lib/tirex/ /var/run/tirex/ /usr/lib/tirex/ /var/log/tirex/ /etx/tirex/`
-- `chown tirex:tirex -R /var/lib/tirex/ /var/run/tirex/ /usr/lib/tirex/ /var/log/tirex/ /etx/tirex/`
+Check whether `/etc/tirex/` and `/usr/lib/tirex/` exist. If not, something went wrong and you should restart the Tirex setup. 
+
+Tirex needs some additional directories to run, so create them now: `sudo mkdir /var/lib/tirex/ /var/run/tirex/ /var/log/tirex/`
+
+Next, run `chown tirex:tirex -R /var/lib/tirex/ /var/run/tirex/ /usr/lib/tirex/ /var/log/tirex/ /etx/tirex/` to allocated respective rights for the user `tirex`.
+
+Now, remove the initial Mapnik directory of Tirex via `sudo rmdir /etc/tirex/renderer/mapnik`. Create a symlink to this repositories folder `tileserver/mapnik_config/` instead, e.g. `sudo ln -s /Documents/TUB-WI/S7_BA_SimRa/simra-visualizations-server/tileserver/mapnik_config /etc/tirex/renderer/mapnik`. **Be sure that the path to `mapnik_config/` does not contain spaces!**
+
+Next, remove all content from the `openseamap/` directory via `sudo rm -r /etc/tirex/renderer/openseamap/*`.
+
+Execute `sudo mkdir /var/lib/tirex/tiles` to create the Tirex tiles folder and for each config file in `tileserver/mapnik_config/` create a folder of the same name in `/var/lib/tirex/tiles/`: `sudo mkdir incident-combined popularity-combined relative-speed-aggregated relative-speed-single rides-density_all rides-density_rushhourevening rides-density_rushhourmorning rides-density_weekend rides-original stoptimes surface-quality-aggregated surface-quality-single`. Grant permission via `sudo chown tirex:tirex -R /var/lib/tirex`.
+
+Then copy the service files `tirex-backend-manager.service` and `tirex-master.service` into the systems service folder. Both service files can be found inside the directory `tileserver/config/` inside this repository.
+
+```
+sudo cp ./tileserver/config/tirex-master.service /etc/systemd/system
+sudo cp ./tileserver/config/tirex-backend-manager.service /etc/systemd/system
+```
+
+Grant this permission: `sudo chown tirex:tirex -R /var/run/tirex`.
+
+Finally, update `/etc/tirex/renderer/mapnik.conf`: `plugindir` should be `/usr/local/lib/mapnik/input` and `fontdir` should be `/usr/local/lib/mapnik/fonts`.
+
+In your `mapnik_config/` directory change the `mapfile` variable to point towards the map files inside `mapnik_maps/`.
+
+Now you can start the Tirex services: `sudo systemctl start tirex-master` and `sudo systemctl start tirex-backend-manager`.
 
 ### Setup apache2
 
-Install the web server by executing `sudo apt install apache2 apache2-dev`. Checking the status of the server with `sudo systemctl status apache2` should yield `active (running)`. If not, start the web server manually via `sudo systemctl start apache2`.
+Install the web server by executing `sudo apt install apache2 apache2-dev`. Checking the status of the server with `systemctl status apache2` should yield `active (running)`. If not, start the web server manually via `sudo systemctl start apache2`.
+
+Now copy `simra-ubuntu.conf` into `/etc/apache2/mods-available`: `sudo cp ./tileserver/config/simra-ubuntu.conf /etc/apache2/mods-available`. Next we system link the config file to `/etc/apache2/mods-enabled`: `sudo ln -s /etc/apache2/mods-available/simra-ubuntu.conf /etc/apache2/mods-enabled`. Apache2 will automatically look into these directories and read those configurations. Lastly restart the service via `sudo systemctl restart apache2`.
 
 ### Setup mod_tile
 
-This package is a module for the Apache web server. If not done yet, add the OSM PPA to the OS: `sudo add-apt-repository -y ppa:osmadmins/ppa`. Now the installation is possible straight forward by executing `sudo apt-get install -y libapache2-mod-tile`.
-
-TODO: Remove because no longer needed
-- `mkdir /usr/include/iniparser/`
-- `sudo cp /usr/include/iniparser.h /usr/include/iniparser/`
-- `sudo ln -s /var/lib/tirex/tiles /var/lib/mod_tile`
+This package is a module for the Apache web server. If not done yet, add the OSM PPA to the OS: `sudo add-apt-repository -y ppa:osmadmins/ppa`. Now the installation is possible straight forward by executing `sudo apt-get install -y libapache2-mod-tile`. Lastly execute `sudo ln -s /var/lib/tirex/tiles /var/lib/mod_tile` to create a system link.
 
 ### Django & Python
 
@@ -168,7 +197,7 @@ Now run `pip install -r requirements.txt` again.
 
 *Attention!* `mapnik==3.0.23` was removed from `requirements.txt`. TODO: Put back in there?
 
-Navigate into the `/api/` directory (if necessary, remove `/SimRaAPI/migrations/`) and run:
+Navigate into the `api/` directory (if necessary, remove `SimRaAPI/migrations/`) and run:
 
 ```
 python manage.py makemigrations SimRaAPI
@@ -179,31 +208,48 @@ python manage.py migrate
 
 This component is used to determine the shortest routes between two GPS coordinates as well as to map match the raw GPS data onto a map.
 
-- Clone the project
-- Copy the config file
-- Start the graphhopper server by executing `./start.sh` inside the `/graphhopper/` directory.
+```
+# Download the Graphhopper web server
+wget https://graphhopper.com/public/releases/graphhopper-web-3.0.jar -P ./graphhopper/
+
+# Download street map data for DACH (Germany, Austria, Switzerland)
+sudo mkdir /var/simra /var/simra/pbf
+sudo wget http://download.geofabrik.de/europe/dach-latest.osm.pbf -P /var/simra/pbf/
+```
+
+If not done yet, install Java on your system: `sudo apt install default-jdk`.
+
+Now start the web server by executing `java -jar ./graphhopper/graphhopper-web-3.0.jar server ./graphhopper/config.yml`. **Make sure this service is running before importing any GPS data.** TODO: Make `start.sh` executable: You can also use the startup script provided in the same folder. To do so, give it execution permission by calling `chmod +x ./graphhopper/start.sh`. Now you can start the Graphhopper web server via `./graphhopper/start.sh`.
+
+*Notice: Starting the service can take a while as it will create a graph inside `graph-cache/`.*
 
 ### Initial database population
 
 Now the PostgreSQL database gets filled with basic map data, retrieved by the OSM service. To do so, we use the tool [Imposm](https://imposm.org/docs/imposm3/latest/).
 
-Fill the database with street segments of the OSM street network: `sudo ./imposm-0.10.0-linux-x86-64/imposm import -mapping mapping.yml -read "berlin-latest.osm.pbf" -overwritecache -write -connection postgis://simra:simra@localhost/simra`. This creates the schema `import` with the table `osm_ways` which is used in the next step by the `create_legs.py` script.
+Navigate into the `osm importer` directory and execute `sudo ./imposm-0.10.0-linux-x86-64/imposm import -mapping mapping.yml -read "berlin-latest.osm.pbf" -overwritecache -write -connection postgis://simra:simra12345simra@localhost/simra`. This creates the schema `import` with the table `osm_ways` which is used in the next step by the `create_legs.py` script.
 
 ### Run the importer
 
-Next, the existing map data is separated into legs which represent single street segments of the street network. To do that, execute `python3 importer/importer/create_legs.py`.
+Next, the existing map data is separated into legs which represent single street segments of the street network. To do that, execute `python importer/importer/create_legs.py`. This will fill the database tables `OsmWaysLegs`, `OsmWaysJunctions` and `OsmWaysLargeJunctions` inside the schema `public` of the `simra` database.
 
-Execute `python3 importer/importer/import.py`. This will import the CSV data into the database.
+Execute `python importer/importer/import.py`. This will import the CSV data into the database.
 
-Attention, depending on the amount of data which is imported, this process can take a while.
+Attention, depending on the amount of data which is imported, this process can take a while. To test if your setup is working we highly recommend to test with a small amount of CSV files.
 
 ### Rendering Map Tiles
 
-Now that everything is set up, the data in the database can be rendered into PNG images which are used by the Tirex tile server.
+Now that everything is set up, the data in the database can be rendered into PNG images which are used by the Tirex tile server. To do so execute `tirex-batch map=rides-original bbox=11.642761,51.894292,15.135040,53.006521 z=0-10`. You can monitor this process by calling `tirex-status` in another terminal instance.
 
 Attention, depending on the amount of data which is imported, this process can take a while.
 
 ## List of known issues
+
+For detailed feedback, the following commands may be useful:
+
+- `tirex-status`
+- `tirex-status --once --extended`
+- `journalctl -xe`
 
 For some of the components mentioned above, detailed setup instructions can be found [here](https://ircama.github.io/osm-carto-tutorials/tile-server-ubuntu/).
 
