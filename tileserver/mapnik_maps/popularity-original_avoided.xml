@@ -14,29 +14,19 @@
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
             <Parameter name="table">(
-                select 
+                select
                     *,
-                    -- max.: 112 (popularity score is good); min.: 0 (popularity score is bad)
-                    concat('hsl(', ROUND(p_score * 112.0), ', 100%, 32%)') as color
-                from (
-                    select
-                        *,
-                        CASE
-                            WHEN a_score = 2 THEN ROUND(c_score / 3)
-                            ELSE ROUND((2 - a_score + c_score) / 3)
-                        END as p_score
-                    from  (
+                    concat('hsl(', ROUND((80 - a_score * 25.0)), ', 80%, 48%)') as color
+                from  (
                         SELECT *,
                             CASE
                                 WHEN "avoidedCount" > "count" THEN 2
                                 ELSE ROUND("avoidedCount" / "count")
                             END as a_score, -- Avoided-Score between 0 and 2
-                            ROUND("chosenCount" / "count") as c_score, -- Chose-Score between 0 and 1
-                            sqrt(count / 500.0) * 4.5 + 1.5 as width
+                            sqrt("avoidedCount" / 500.0) * 4.5 + 1.5 as width
                         FROM public."SimRaAPI_osmwayslegs"
                         WHERE count > 0 AND "avoidedCount" > 0
-                    ) needed
-                ) q
+                ) needed
             ) t</Parameter>
         </Datasource>
     </Layer>

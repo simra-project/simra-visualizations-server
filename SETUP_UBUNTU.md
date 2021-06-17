@@ -146,7 +146,7 @@ Tirex needs some additional directories to run, so create them now: `sudo mkdir 
 
 Next, run `chown tirex:tirex -R /var/lib/tirex/ /var/run/tirex/ /usr/lib/tirex/ /var/log/tirex/ /etx/tirex/` to allocated respective rights for the user `tirex`.
 
-Now, remove the initial Mapnik directory of Tirex via `sudo rmdir /etc/tirex/renderer/mapnik`. Create a symlink to this repositories folder `tileserver/mapnik_config/` instead, e.g. `sudo ln -s /Documents/TUB-WI/S7_BA_SimRa/simra-visualizations-server/tileserver/mapnik_config /etc/tirex/renderer/mapnik`. **Be sure that the path to `mapnik_config/` does not contain spaces!**
+Now, remove the initial Mapnik directory of Tirex via `sudo rmdir /etc/tirex/renderer/mapnik`. Create a symlink to this repositories folder `tileserver/mapnik_config/` instead, e.g. `sudo ln -s /home/sfuehr/Documents/TUB-WI/S7_BA_SimRa/simra-visualizations-server/tileserver/mapnik_config /etc/tirex/renderer/mapnik`. **Be sure that the path to `mapnik_config/` does not contain spaces!**
 
 Next, remove all content from the `openseamap/` directory via `sudo rm -r /etc/tirex/renderer/openseamap/*`.
 

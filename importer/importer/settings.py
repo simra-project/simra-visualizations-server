@@ -2,7 +2,7 @@ import logging
 
 # Possible debug levels are CRITICAL, ERROR, WARNING, INFO and DEBUG.
 logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s - %(module)s - %(message)s"
+    level=logging.INFO, format="%(levelname)s - %(module)s - %(message)s"
 )
 
 IMPORT_DIRECTORY = "/home/sfuehr/Documents/TUB-WI/S7_BA_SimRa/Monitored_CSV_Data"
