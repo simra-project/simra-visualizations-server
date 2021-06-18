@@ -5,7 +5,10 @@ logging.basicConfig(
     level=logging.INFO, format="%(levelname)s - %(module)s - %(message)s"
 )
 
+# The directory to import the SimRa generated CSV files from.
 IMPORT_DIRECTORY = "/home/sfuehr/Documents/TUB-WI/S7_BA_SimRa/Monitored_CSV_Data"
+
+# PostgreSQL database connection parameters.
 DB_HOST = "127.0.0.1"
 DB_NAME = "simra"
 DB_USER = "simra"
@@ -28,5 +31,10 @@ COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD = (
 )
 
 GET_ALL_SURFACE_SCORES = False
+
+# Percentage at which an alternate route is counted as a detour. E.g.
+# 1.1 for when an alternative route can cover 10% more length before
+# it is considered as a detour.
+DETOUR_THRESHOLD = 1.1
 
 logging.info("Loaded")

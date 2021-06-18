@@ -12,8 +12,9 @@ while [ -n "$1" ]; do # while loop starts
             ;;
         
         -d) # Development reset
-            sudo ./$0 -e maps
-            sudo ./$0 -s tm
+            sudo $0 -e maps
+            sudo $0 -s tm
+            sudo $0 -s tbm
             shift
             ;;
         

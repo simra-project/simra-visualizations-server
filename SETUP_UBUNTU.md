@@ -50,6 +50,8 @@ Now restart the terminal or execute `source ~/.bashrc` and check whether the ins
 
 (Steps taken from [this](https://stackoverflow.com/questions/63207385/how-do-i-install-pip-for-python-3-8-on-ubuntu-without-changing-any-defaults) tutorial.)
 
+Lastly, start django by executing `python manage.py runserver` in the `api/` directory.
+
 Python packages which have to be installed after (TODO: Add to requirements.txt):
 - `rdp`
 - `geopy`
