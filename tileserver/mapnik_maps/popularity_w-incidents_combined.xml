@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:3857">
+    <Style name="legs" filter-mode="first">
+        <Rule>
+            <LineSymbolizer stroke="[color]" stroke-width="[width]"/>
+        </Rule>
+    </Style>
+    <Style name="incident">
+        <Rule>
+            <Filter>[scary] = true</Filter>
+            <MaxScaleDenominator>68246</MaxScaleDenominator> <!-- z > 13 -->
+            <MinScaleDenominator>8532</MinScaleDenominator> <!-- z < 16 -->
+            <MarkersSymbolizer fill="#9e1a16" stroke-width="0.0" width="8" height="8" allow-overlap="true" opacity="0.9"/>
+        </Rule>
+        <Rule>
+            <Filter>[scary] = false</Filter>
+            <MaxScaleDenominator>68246</MaxScaleDenominator> <!-- z > 13 -->
+            <MinScaleDenominator>8532</MinScaleDenominator> <!-- z < 16 -->
+            <MarkersSymbolizer fill="#777777" stroke-width="0.0" width="8" height="8" allow-overlap="true" opacity="0.9"/>
+        </Rule>
+    </Style>
+    <Layer name="legs" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>legs</StyleName>
+        <Datasource>
+            <Parameter name="type">postgis</Parameter>
+            <Parameter name="host">localhost</Parameter>
+            <Parameter name="dbname">simra</Parameter>
+            <Parameter name="user">simra</Parameter>
+            <Parameter name="password">simra12345simra</Parameter>
+            <Parameter name="table">(
+                select 
+                    *,
+                    -- max.: 112 (popularity score is good); min.: 0 (popularity score is bad)
+                    concat('hsl(', ROUND(p_score * 112.0), ', 100%, 32%)') as color
+                from (
+                    select
+                        *,
+                        CASE
+                            WHEN a_score = 2 THEN ROUND(c_score / 3)
+                            ELSE ROUND((2 - a_score + c_score) / 3)
+                        END as p_score
+                    from  (
+                        SELECT *,
+                            CASE
+                                WHEN "avoidedCount" > "count" THEN 2
+                                ELSE ROUND("avoidedCount" / "count")
+                            END as a_score, -- Avoided-Score between 0 and 2
+                            ROUND("chosenCount" / "count") as c_score, -- Chose-Score between 0 and 1
+                            sqrt(count / 500.0) * 4.5 + 1.5 as width
+                        FROM public."SimRaAPI_osmwayslegs"
+                        WHERE count > 0 AND "avoidedCount" > 0
+                    ) needed
+                ) q
+            ) t</Parameter>
+        </Datasource>
+    </Layer>
+    <Layer name="incidents" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>incident</StyleName>
+        <Datasource>
+            <Parameter name="type">postgis</Parameter>
+            <Parameter name="host">localhost</Parameter>
+            <Parameter name="dbname">simra</Parameter>
+            <Parameter name="user">simra</Parameter>
+            <Parameter name="password">simra12345simra</Parameter>
+            <Parameter name="table">(select * from public."SimRaAPI_incident" where incident > 0) t</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

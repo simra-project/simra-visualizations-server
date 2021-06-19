@@ -153,7 +153,7 @@ Now, remove the initial Mapnik directory of Tirex via `sudo rmdir /etc/tirex/ren
 
 Next, remove all content from the `openseamap/` directory via `sudo rm -r /etc/tirex/renderer/openseamap/*`.
 
-Execute `sudo mkdir /var/lib/tirex/tiles` to create the Tirex tiles folder and for each config file in `tileserver/mapnik_config/` create a folder of the same name in `/var/lib/tirex/tiles/`: `sudo mkdir incident-combined popularity-combined relative-speed-aggregated relative-speed-single rides-density_all rides-density_rushhourevening rides-density_rushhourmorning rides-density_weekend rides-original stoptimes surface-quality-aggregated surface-quality-single`. Grant permission via `sudo chown tirex:tirex -R /var/lib/tirex`.
+Execute `sudo mkdir /var/lib/tirex/tiles` to create the Tirex tiles folder and for each config file in `tileserver/mapnik_config/` create a folder of the same name in `/var/lib/tirex/tiles/`: `sudo mkdir incident-combined popularity-combined relative-speed-aggregated relative-speed-single rides-density_all rides-density_rushhourevening rides-density_rushhourmorning rides-density_weekend rides-original stoptimes surface-quality-aggregated surface-quality-single popularity-score popularity-combined popularity-original_avoided popularity-original_chosen popularity_w-incidents_combined popularity_w-incidents_score popularity-original_w-incidents_avoided popularity-original_w-incidents_chosen`. Grant permission via `sudo chown tirex:tirex -R /var/lib/tirex`.
 
 Then copy the service files `tirex-backend-manager.service` and `tirex-master.service` into the systems service folder. Both service files can be found inside the directory `tileserver/config/` inside this repository.
 
