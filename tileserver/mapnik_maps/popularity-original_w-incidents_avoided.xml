@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:3857">
+    <Style name="legs" filter-mode="first">
+        <Rule>
+            <LineSymbolizer stroke="[color]" stroke-width="[width]"/>
+        </Rule>
+    </Style>
+    <Style name="incident">
+        <Rule>
+            <Filter>[scary] = true</Filter>
+            <MaxScaleDenominator>68246</MaxScaleDenominator> <!-- z > 13 -->
+            <MinScaleDenominator>8532</MinScaleDenominator> <!-- z < 16 -->
+            <MarkersSymbolizer fill="#9e1a16" stroke-width="0.0" width="8" height="8" allow-overlap="true" opacity="0.9"/>
+        </Rule>
+        <Rule>
+            <Filter>[scary] = false</Filter>
+            <MaxScaleDenominator>68246</MaxScaleDenominator> <!-- z > 13 -->
+            <MinScaleDenominator>8532</MinScaleDenominator> <!-- z < 16 -->
+            <MarkersSymbolizer fill="#777777" stroke-width="0.0" width="8" height="8" allow-overlap="true" opacity="0.9"/>
+        </Rule>
+    </Style>
+    <Layer name="legs" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>legs</StyleName>
+        <Datasource>
+            <Parameter name="type">postgis</Parameter>
+            <Parameter name="host">localhost</Parameter>
+            <Parameter name="dbname">simra</Parameter>
+            <Parameter name="user">simra</Parameter>
+            <Parameter name="password">simra12345simra</Parameter>
+            <Parameter name="table">(
+                SELECT
+                    *,
+                    concat('hsl(', ROUND((240 - (1 - a_score) * 50.0)), ', 71%, 53%)') as color
+                FROM  (
+                    SELECT
+                        *,
+                        -- Avoided-Score between 0 and 1
+                        CASE
+                            WHEN "avoidedCount" > "count" THEN 1.0
+                            ELSE ROUND("avoidedCount"::numeric / "count"::numeric, 2)
+                        END as a_score, 
+                        -- stroke width
+                        sqrt("avoidedCount" / 500.0) * 4.5 + 1.5 as width
+                    FROM public."SimRaAPI_osmwayslegs"
+                    WHERE count > 0
+                ) needed
+            ) t</Parameter>
+        </Datasource>
+    </Layer>
+    <Layer name="incidents" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>incident</StyleName>
+        <Datasource>
+            <Parameter name="type">postgis</Parameter>
+            <Parameter name="host">localhost</Parameter>
+            <Parameter name="dbname">simra</Parameter>
+            <Parameter name="user">simra</Parameter>
+            <Parameter name="password">simra12345simra</Parameter>
+            <Parameter name="table">(select * from public."SimRaAPI_incident" where incident > 0) t</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

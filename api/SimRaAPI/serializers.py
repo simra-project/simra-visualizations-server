@@ -6,26 +6,49 @@ from .models import Ride, Incident, ParsedFiles, OsmWaysLegs
 class RideSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Ride
-        geo_field = 'geom'
-        fields = ('filename',)
+        geo_field = "geom"
+        fields = ("filename",)
 
 
 class IncidentSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Incident
-        geo_field = 'geom'
-        fields = ('rideTimestamp', 'bikeType', 'childCheckbox', 'trailerCheckbox', 'pLoc', 'incident', 'iType', 'scary', 'desc', 'filename', 'ride_id')
+        geo_field = "geom"
+        fields = (
+            "rideTimestamp",
+            "bikeType",
+            "childCheckbox",
+            "trailerCheckbox",
+            "pLoc",
+            "incident",
+            "iType",
+            "scary",
+            "desc",
+            "filename",
+            "ride_id",
+        )
 
 
 class ParsedFilesSerializer(ModelSerializer):
     class Meta:
         model = ParsedFiles
-        fields = ('fileName', 'fileType', 'importTimestamp')
+        fields = ("fileName", "fileType", "importTimestamp")
 
 
 class LegSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = OsmWaysLegs
-        geo_field = 'geom'
-        fields = ('osmId', 'streetName', 'postalCode', 'highwayName', 'count', 'score', 'weekdayCount', 'morning_count', 'evening_count')
-
+        geo_field = "geom"
+        fields = (
+            "osmId",
+            "streetName",
+            "postalCode",
+            "highwayName",
+            "count",
+            "score",
+            "weekdayCount",
+            "morning_count",
+            "evening_count",
+            "avoided_count",
+            "chosen_count",
+        )

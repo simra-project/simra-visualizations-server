@@ -5,6 +5,12 @@ from postgis import LineString
 
 
 def process_surface(ride, accelerations):
+    """
+    Raises
+    ------
+    ValueError
+        Latitude normalization has been prohibited in the newer versions of geopy.
+    """
     raw_coords = ride.raw_coords
     timestamps = ride.timestamps
     first_five_seconds = []
@@ -41,7 +47,10 @@ def process_surface(ride, accelerations):
             current_max_idx += 1
         if len(in_window) < 2:
             continue
-        Sh = great_circle(in_window[0][4], in_window[-1][4]).meters
+        try:
+            Sh = great_circle(in_window[0][4], in_window[-1][4]).meters
+        except ValueError as e:
+            raise ValueError from e
         if Sh > 0:
             iri = sum(list(zip(*in_window))[5]) / Sh
             if not (IRI and (ts - IRI[-1][1]).total_seconds() < every_x_seconds):
