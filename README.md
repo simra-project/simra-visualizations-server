@@ -26,4 +26,6 @@ The following components are also needed:
 
 ## Setup
 
-A detailed setup guide for Arch linux systems can be found [here](SETUP_ARCH.md).
+Detailed setup guides can be found here:
+- [Arch](doc/SETUP_ARCH.md)
+- [Ubuntu 18.04 LTS](doc/SETUP_UBUNTU.md)

@@ -19,23 +19,35 @@ while [ -n "$1" ]; do # while loop starts
             ;;
         
         -h) # Prints help
-            VAR1=`cat <<EOF
+            VAR1=$(cat <<EOF
 Usage: tirex.sh [OPTION] [PARAMETER]
 
 Shell script to manage tirex-related services.
 
 Known values for OPTION are:
 
-  -c    Creates the directory /var/run/tirex and gives ownership to 'tirex' user.
+  -c    Creates the directory /var/run/tirex and gives ownership to
+        'tirex' user.
 
-  -d    Developer shortcut. Calls this script with '-e maps' and '-s all'.
+  -d    Developer shortcut. Calls this script with '-e maps' and
+        '-s all'.
 
   -h    Prints this help message.
 
   -e    Empties specified directories.
 
             Known values for PARAMETER for this command are:
-              maps    All map tile meta data in /etc/lib/tirex/tiles map folders. -!For now only popularity maps are affected!-
+              maps  All map tile meta data in /etc/lib/tirex/tiles map
+                    folders. -!For now only popularity maps are affected!-
+
+  -g    Executes the 'tirex-batch' command in a bounding box from
+        11.642761, 51.894292 to 15.135040, 53.006521 for all maps.
+
+            Known values for PARAMETER for this command are:
+              String Defines the zoom levels for which the tiles should
+                     be rendered. The string should be 'x1-x1' where x1
+                     and x2 can be numbers between 0 and 18 and
+                     x1 < x2. Default: 0-18
 
   -s    Restarts specified services.
 
@@ -51,7 +63,7 @@ Known values for OPTION are:
               status  Display the extended tirex status.
 \n
 EOF
-`
+)
             echo "${VAR1}"
             shift
             ;;
@@ -72,6 +84,37 @@ EOF
             else
                 echo "Unknown command option. Can't empty the directory. Use -h for available options."
             fi
+            shift
+            ;;
+        
+        -g) # Start Tirex tile generation
+            param=$2
+            if [ -z $param ]
+            then
+                param=0-18
+            fi
+            tirex-batch --prio=25 \
+            map=incident-combined,\
+            relative-speed-single,\
+            rides-density_rushhourevening,\
+            rides-density_weekend,\
+            stoptimes,\
+            surface-quality-single,\
+            relative-speed-aggregated,\
+            rides-density_all,\
+            rides-density_rushhourmorning,\
+            rides-original,\
+            surface-quality-aggregated,\
+            popularity-combined,\
+            popularity-score,\
+            popularity-original_avoided,\
+            popularity-original_chosen,\
+            popularity_w-incidents_combined,\
+            popularity_w-incidents_score\
+            popularity-original_w-incidents_avoided,\
+            popularity-original_w-incidents_chosen \
+            bbox=11.642761,51.894292,15.135040,53.006521 \
+            z=$param
             shift
             ;;
 

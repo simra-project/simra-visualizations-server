@@ -1,1 +1,0 @@
-tirex-batch --prio=25 map=incident-combined,relative-speed-single,rides-density_rushhourevening,rides-density_weekend,stoptimes,surface-quality-single,relative-speed-aggregated,rides-density_all,rides-density_rushhourmorning,rides-original,surface-quality-aggregated bbox=11.642761,51.894292,15.135040,53.006521 z=0-18 

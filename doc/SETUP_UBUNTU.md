@@ -1,16 +1,15 @@
 - [Setup on Ubuntu Linux](#setup-on-ubuntu-linux)
-  - [Setup Instructions](#setup-instructions)
-    - [Python](#python)
-    - [PostgreSQL Database](#postgresql-database)
-    - [Setup mapnik and tirex](#setup-mapnik-and-tirex)
-    - [Setup apache2](#setup-apache2)
-    - [Setup mod_tile](#setup-mod_tile)
-    - [Django & Python](#django--python)
-    - [Graphhopper](#graphhopper)
-    - [Initial database population](#initial-database-population)
-    - [Run the importer](#run-the-importer)
-    - [Rendering Map Tiles](#rendering-map-tiles)
-  - [List of known issues](#list-of-known-issues)
+  - [Python](#python)
+  - [PostgreSQL Database](#postgresql-database)
+  - [Setup mapnik and tirex](#setup-mapnik-and-tirex)
+  - [Setup apache2](#setup-apache2)
+  - [Setup mod_tile](#setup-mod_tile)
+  - [Django & Python](#django--python)
+  - [Graphhopper](#graphhopper)
+  - [Initial database population](#initial-database-population)
+  - [Run the importer](#run-the-importer)
+  - [Rendering Map Tiles](#rendering-map-tiles)
+- [List of known issues](#list-of-known-issues)
 
 # Setup on Ubuntu Linux
 
@@ -18,11 +17,9 @@ Latest update: 13.06.2021
 
 This guide describes the project setup for Ubuntu 18.04. If you have a clean setup OS you can also try running the `util/ubuntu-setup.sh` script which should do all the steps described here automatically.
 
-## Setup Instructions
-
 Make sure all your packages are up to date with `sudo apt update`.
 
-### Python
+## Python
 
 Install Python 3.8 and python development headers: `sudo apt install python3.8 python3.8-dev`
 
@@ -58,7 +55,7 @@ Python packages which have to be installed after (TODO: Add to requirements.txt)
 - `geopy`
 - `gpxpy`
 
-### PostgreSQL Database
+## PostgreSQL Database
 
 Install the database via `sudo apt install postgresql postgresql-contrib`. `psql --version`. should return `10.17`.
 
@@ -88,7 +85,7 @@ Install postgis via `sudo apt install postgis`. Next, you need to log into the d
 
 We recommend the tool pgAdmin4 for managing the PostgreSQL database because it allows for geo data visualization. It can be installed, following [this tutorial](https://www.pgadmin.org/download/pgadmin-4-apt/).
 
-### Setup mapnik and tirex
+## Setup mapnik and tirex
 
 Clone the mapnik repository via `git clone https://github.com/mapnik/mapnik` and enter the `mapnik/` directory.
 
@@ -170,17 +167,17 @@ In your `mapnik_config/` directory change the `mapfile` variable to point toward
 
 Now you can start the Tirex services: `sudo systemctl start tirex-master` and `sudo systemctl start tirex-backend-manager`.
 
-### Setup apache2
+## Setup apache2
 
 Install the web server by executing `sudo apt install apache2 apache2-dev`. Checking the status of the server with `systemctl status apache2` should yield `active (running)`. If not, start the web server manually via `sudo systemctl start apache2`.
 
 Now copy `simra-ubuntu.conf` into `/etc/apache2/mods-available`: `sudo cp ./tileserver/config/simra-ubuntu.conf /etc/apache2/mods-available`. Next we system link the config file to `/etc/apache2/mods-enabled`: `sudo ln -s /etc/apache2/mods-available/simra-ubuntu.conf /etc/apache2/mods-enabled`. Apache2 will automatically look into these directories and read those configurations. Lastly restart the service via `sudo systemctl restart apache2`.
 
-### Setup mod_tile
+## Setup mod_tile
 
 This package is a module for the Apache web server. If not done yet, add the OSM PPA to the OS: `sudo add-apt-repository -y ppa:osmadmins/ppa`. Now the installation is possible straight forward by executing `sudo apt-get install -y libapache2-mod-tile`. Lastly execute `sudo ln -s /var/lib/tirex/tiles /var/lib/mod_tile` to create a system link.
 
-### Django & Python
+## Django & Python
 
 Now that the database is set up, we will create database models which will define the form of the database tables which will be filled later. For that, the project uses the django framework which can be installed with pip: `pip install django`.
 
@@ -207,7 +204,7 @@ python manage.py makemigrations SimRaAPI
 python manage.py migrate
 ```
 
-### Graphhopper
+## Graphhopper
 
 This component is used to determine the shortest routes between two GPS coordinates as well as to map match the raw GPS data onto a map.
 
@@ -226,13 +223,13 @@ Now start the web server by executing `java -jar ./graphhopper/graphhopper-web-3
 
 _Notice: Starting the service can take a while as it will create a graph inside `graph-cache/`._
 
-### Initial database population
+## Initial database population
 
 Now the PostgreSQL database gets filled with basic map data, retrieved by the OSM service. To do so, we use the tool [Imposm](https://imposm.org/docs/imposm3/latest/).
 
 Navigate into the `osm importer` directory and execute `sudo ./imposm-0.10.0-linux-x86-64/imposm import -mapping mapping.yml -read "berlin-latest.osm.pbf" -overwritecache -write -connection postgis://simra:simra12345simra@localhost/simra`. This creates the schema `import` with the table `osm_ways` which is used in the next step by the `create_legs.py` script.
 
-### Run the importer
+## Run the importer
 
 Next, the existing map data is separated into legs which represent single street segments of the street network. To do that, execute `python importer/importer/create_legs.py`. This will fill the database tables `OsmWaysLegs`, `OsmWaysJunctions` and `OsmWaysLargeJunctions` inside the schema `public` of the `simra` database.
 
@@ -240,19 +237,20 @@ Execute `python importer/importer/import.py`. This will import the CSV data into
 
 Attention, depending on the amount of data which is imported, this process can take a while. To test if your setup is working we highly recommend to test with a small amount of CSV files.
 
-### Rendering Map Tiles
+## Rendering Map Tiles
 
 Now that everything is set up, the data in the database can be rendered into PNG images which are used by the Tirex tile server. To do so execute `tirex-batch map=rides-original bbox=11.642761,51.894292,15.135040,53.006521 z=0-10`. You can monitor this process by calling `tirex-status` in another terminal instance.
 
 Attention, depending on the amount of data which is imported, this process can take a while.
 
-## List of known issues
+# List of known issues
 
 For detailed feedback, the following commands may be useful:
 
 - `tirex-status`
 - `tirex-status --once --extended`
 - `journalctl -xe`
+- For development and easier use of Tirex related task, check out the `tirex` bash script in `util/`. To view available commands and options execute `./util/tirex.sh -h`.
 
 For some of the components mentioned above, detailed setup instructions can be found [here](https://ircama.github.io/osm-carto-tutorials/tile-server-ubuntu/).
 
