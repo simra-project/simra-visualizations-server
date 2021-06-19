@@ -5,20 +5,6 @@
             <LineSymbolizer stroke="[color]" stroke-width="[width]"/>
         </Rule>
     </Style>
-    <Style name="incident">
-        <Rule>
-            <Filter>[scary] = true</Filter>
-            <MaxScaleDenominator>68246</MaxScaleDenominator> <!-- z > 13 -->
-            <MinScaleDenominator>8532</MinScaleDenominator> <!-- z < 16 -->
-            <MarkersSymbolizer fill="#9e1a16" stroke-width="0.0" width="8" height="8" allow-overlap="true" opacity="0.9"/>
-        </Rule>
-        <Rule>
-            <Filter>[scary] = false</Filter>
-            <MaxScaleDenominator>68246</MaxScaleDenominator> <!-- z > 13 -->
-            <MinScaleDenominator>8532</MinScaleDenominator> <!-- z < 16 -->
-            <MarkersSymbolizer fill="#777777" stroke-width="0.0" width="8" height="8" allow-overlap="true" opacity="0.9"/>
-        </Rule>
-    </Style>
     <Layer name="legs" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>legs</StyleName>
         <Datasource>
@@ -27,42 +13,46 @@
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
+            <!--
+            Color gradiant for p_score:
+                100%  68, 153, 53 dark green
+                75%  142, 192, 84 light green
+                50%  237, 226,  4 yellow
+                30%  239, 125,  7 orange
+                15%  227,  11, 19 red
+                0%   158,  26, 22 dark red
+            -->
             <Parameter name="table">(
-                select 
+                SELECT 
                     *,
-                    -- max.: 112 (popularity score is good); min.: 0 (popularity score is bad)
-                    concat('hsl(', ROUND(p_score * 112.0), ', 100%, 32%)') as color
-                from (
-                    select
+                    CASE 
+                        WHEN p_score BETWEEN 0.0 AND 0.15 THEN concat('rgb(', ROUND(158 + (p_score / 0.15) * 69.0), ',', ROUND(26 - (p_score / 0.15) * 15.0), ',', ROUND(22 - (p_score / 0.15) * 3.0), ')')
+                        WHEN p_score BETWEEN 0.15 AND 0.30 THEN concat('rgb(', ROUND(227 + ((p_score - 0.15) / 0.15) * 12.0), ',', ROUND(11 + ((p_score - 0.15) / 0.15) * 114.0), ',', ROUND(19 - ((p_score - 0.15) / 0.15) * 8.0), ')')
+                        WHEN p_score BETWEEN 0.30 AND 0.50 THEN concat('rgb(', ROUND(239 - ((p_score - 0.3) / 0.2) * 2.0), ',', ROUND(125 + ((p_score - 0.3) / 0.2) * 101.0), ',', ROUND(7 - ((p_score - 0.3) / 0.2) * 3.0), ')')
+                        WHEN p_score BETWEEN 0.50 AND 0.75 THEN concat('rgb(', ROUND(237 - ((p_score - 0.5) / 0.25) * 95.0), ',', ROUND(226 - ((p_score - 0.5) / 0.25) * 34.0), ',', ROUND(4 + ((p_score - 0.5) / 0.25) * 8.0), ')')
+                        ELSE concat('rgb(', ROUND(142 - ((p_score - 0.75) / 0.25) * 74.0), ',', ROUND(192 - ((p_score - 0.75) / 0.25) * 39.0), ',', ROUND(84 - ((p_score - 0.75) / 0.25) * 31.0), ')')
+                    END as color
+                FROM (
+                    SELECT
                         *,
-                        CASE
-                            WHEN a_score = 2 THEN ROUND(c_score / 3)
-                            ELSE ROUND((2 - a_score + c_score) / 3)
-                        END as p_score
-                    from  (
+                        -- popularity score
+                        ROUND((1 - a_score + c_score) / 2, 2) as p_score
+                    FROM  (
                         SELECT *,
+                            -- Avoided-Score between 0 and 1
                             CASE
-                                WHEN "avoidedCount" > "count" THEN 2
-                                ELSE ROUND("avoidedCount" / "count")
-                            END as a_score, -- Avoided-Score between 0 and 2
-                            ROUND("chosenCount" / "count") as c_score, -- Chose-Score between 0 and 1
+                                WHEN "avoidedCount" > "count" THEN 1.0
+                                ELSE ROUND("avoidedCount"::numeric / "count"::numeric, 2)
+                            END as a_score,
+                            -- Chose-Score between 0 and 1
+                            ROUND("chosenCount"::numeric / "count"::numeric, 2) as c_score,
+                            -- stroke width
                             sqrt(count / 500.0) * 4.5 + 1.5 as width
                         FROM public."SimRaAPI_osmwayslegs"
-                        WHERE count > 0 AND "avoidedCount" > 0
+                        WHERE count > 0
                     ) needed
                 ) q
             ) t</Parameter>
-        </Datasource>
-    </Layer>
-    <Layer name="incidents" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-        <StyleName>incident</StyleName>
-        <Datasource>
-            <Parameter name="type">postgis</Parameter>
-            <Parameter name="host">localhost</Parameter>
-            <Parameter name="dbname">simra</Parameter>
-            <Parameter name="user">simra</Parameter>
-            <Parameter name="password">simra12345simra</Parameter>
-            <Parameter name="table">(select * from public."SimRaAPI_incident" where incident > 0) t</Parameter>
         </Datasource>
     </Layer>
 </Map>

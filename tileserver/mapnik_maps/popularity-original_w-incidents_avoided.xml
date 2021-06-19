@@ -28,18 +28,21 @@
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
             <Parameter name="table">(
-                select
+                SELECT
                     *,
-                    concat('hsl(', ROUND((80 - a_score * 25.0)), ', 80%, 48%)') as color
-                from  (
-                        SELECT *,
-                            CASE
-                                WHEN "avoidedCount" > "count" THEN 2
-                                ELSE ROUND("avoidedCount" / "count")
-                            END as a_score, -- Avoided-Score between 0 and 2
-                            sqrt("avoidedCount" / 500.0) * 4.5 + 1.5 as width
-                        FROM public."SimRaAPI_osmwayslegs"
-                        WHERE count > 0 AND "avoidedCount" > 0
+                    concat('hsl(', ROUND((240 - (1 - a_score) * 50.0)), ', 71%, 53%)') as color
+                FROM  (
+                    SELECT
+                        *,
+                        -- Avoided-Score between 0 and 1
+                        CASE
+                            WHEN "avoidedCount" > "count" THEN 1.0
+                            ELSE ROUND("avoidedCount"::numeric / "count"::numeric, 2)
+                        END as a_score, 
+                        -- stroke width
+                        sqrt("avoidedCount" / 500.0) * 4.5 + 1.5 as width
+                    FROM public."SimRaAPI_osmwayslegs"
+                    WHERE count > 0
                 ) needed
             ) t</Parameter>
         </Datasource>

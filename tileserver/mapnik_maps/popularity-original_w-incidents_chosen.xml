@@ -28,12 +28,19 @@
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
             <Parameter name="table">(
-                select
+                SELECT
                     *,
-                    concat('hsl(', ROUND((240 - (1 - ("chosenCount" / 500.0)) * 50.0)), ', 71%, 53%)') as color,
-                    sqrt("chosenCount" / 500.0) * 4.5 + 1.5 as width
-                from public."SimRaAPI_osmwayslegs"
-                where "chosenCount" > 0 AND "count" > 0
+                    concat('hsl(', ROUND((240 - (1 - c_score) * 50.0)), ', 71%, 53%)') as color
+                FROM (
+                    SELECT
+                        *,
+                        -- chosen score
+                        ROUND("chosenCount"::numeric / "count"::numeric, 2) as c_score,
+                        -- stroke width
+                        sqrt("chosenCount" / 500.0) * 4.5 + 1.5 as width
+                    FROM public."SimRaAPI_osmwayslegs" AS legs
+                    WHERE "count" > 0
+                ) needed
             ) t</Parameter>
         </Datasource>
     </Layer>
