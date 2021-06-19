@@ -16,7 +16,7 @@
 
 Latest update: 13.06.2021
 
-This guide describes the project setup for Ubuntu 18.04.
+This guide describes the project setup for Ubuntu 18.04. If you have a clean setup OS you can also try running the `util/ubuntu-setup.sh` script which should do all the steps described here automatically.
 
 ## Setup Instructions
 
@@ -28,14 +28,14 @@ Install Python 3.8 and python development headers: `sudo apt install python3.8 p
 
 `python3.8 --version` should return `Python 3.8.10` now.
 
-Now, to install pip for python 3.8, first execute `sudo apt remove python-pip` to remove existing pip versions. Then check, whether pip is no longer installed (`pip --version`).
-
-Now, change the `python` comand to point towards `python3.8` instead of python 2:
+Now, change the `python` command to point towards `python3.8` instead of python 2:
 
 ```
 update-alternatives --remove python /usr/bin/python2
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 10
 ```
+
+Now, to install pip for python 3.8, first execute `sudo apt remove python-pip` to remove existing pip versions. Then check, whether pip is no longer installed (`pip --version`).
 
 Next, install pip for Python 3.6 via `sudo apt install python3-pip` (`pip3 --version`) and then install pip for Python 3.8 by using pip: `python -m pip install pip`. Last, set your `~/.local/bin/` directory in the `PATH` variable. To do so, open `~./bashrc` (or your respective shell configuration file) and paste the following at the end of the file:
 
@@ -53,6 +53,7 @@ Now restart the terminal or execute `source ~/.bashrc` and check whether the ins
 Lastly, start django by executing `python manage.py runserver` in the `api/` directory.
 
 Python packages which have to be installed after (TODO: Add to requirements.txt):
+
 - `rdp`
 - `geopy`
 - `gpxpy`
@@ -83,7 +84,7 @@ To quit the CLI, type `\q` and press enter.
 
 (The steps above where taken from [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial.)
 
-Install postgis via `sudo apt install postgis`. Next, you need to log into the database as the `postgres` user and activate PostGIS by executing  `CREATE EXTENSION postgis;`. The `SELECT PostGIS_full_version();` should yield version 2.4.3.Log out again.
+Install postgis via `sudo apt install postgis`. Next, you need to log into the database as the `postgres` user and activate PostGIS by executing `CREATE EXTENSION postgis;`. The `SELECT PostGIS_full_version();` should yield version 2.4.3.Log out again.
 
 We recommend the tool pgAdmin4 for managing the PostgreSQL database because it allows for geo data visualization. It can be installed, following [this tutorial](https://www.pgadmin.org/download/pgadmin-4-apt/).
 
@@ -117,7 +118,7 @@ make test # This yields 6 errors if your OS username is not 'simra' but you can 
 sudo make install
 ```
 
-Install `python-mapnik` by using apt: `sudo apt install python-mapnik`. *Attention!* This could yield errors, as this is probably not meant for mapnik 3.0.x!
+Install `python-mapnik` by using apt: `sudo apt install python-mapnik`. _Attention!_ This could yield errors, as this is probably not meant for mapnik 3.0.x!
 
 For tirex we first need a new user:
 
@@ -142,7 +143,7 @@ make
 sudo make install
 ```
 
-Check whether `/etc/tirex/` and `/usr/lib/tirex/` exist. If not, something went wrong and you should restart the Tirex setup. 
+Check whether `/etc/tirex/` and `/usr/lib/tirex/` exist. If not, something went wrong and you should restart the Tirex setup.
 
 Tirex needs some additional directories to run, so create them now: `sudo mkdir /var/lib/tirex/ /var/run/tirex/ /var/log/tirex/`
 
@@ -197,7 +198,7 @@ TODO: Can the apt-get commands be executed together?
 
 Now run `pip install -r requirements.txt` again.
 
-*Attention!* `mapnik==3.0.23` was removed from `requirements.txt`. TODO: Put back in there?
+_Attention!_ `mapnik==3.0.23` was removed from `requirements.txt`. TODO: Put back in there?
 
 Navigate into the `api/` directory (if necessary, remove `SimRaAPI/migrations/`) and run:
 
@@ -223,7 +224,7 @@ If not done yet, install Java on your system: `sudo apt install default-jdk`.
 
 Now start the web server by executing `java -jar ./graphhopper/graphhopper-web-3.0.jar server ./graphhopper/config.yml`. **Make sure this service is running before importing any GPS data.** TODO: Make `start.sh` executable: You can also use the startup script provided in the same folder. To do so, give it execution permission by calling `chmod +x ./graphhopper/start.sh`. Now you can start the Graphhopper web server via `./graphhopper/start.sh`.
 
-*Notice: Starting the service can take a while as it will create a graph inside `graph-cache/`.*
+_Notice: Starting the service can take a while as it will create a graph inside `graph-cache/`._
 
 ### Initial database population
 
