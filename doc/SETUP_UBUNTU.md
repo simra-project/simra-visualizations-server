@@ -1,7 +1,7 @@
 - [Setup on Ubuntu Linux](#setup-on-ubuntu-linux)
   - [Python](#python)
   - [PostgreSQL Database](#postgresql-database)
-  - [Setup mapnik and tirex](#setup-mapnik-and-tirex)
+  - [Setup Mapnik and tirex](#setup-mapnik-and-tirex)
   - [Setup apache2](#setup-apache2)
   - [Setup mod_tile](#setup-mod_tile)
   - [Django & Python](#django--python)
@@ -85,7 +85,7 @@ Install postgis via `sudo apt install postgis`. Next, you need to log into the d
 
 We recommend the tool pgAdmin4 for managing the PostgreSQL database because it allows for geo data visualization. It can be installed, following [this tutorial](https://www.pgadmin.org/download/pgadmin-4-apt/).
 
-## Setup mapnik and tirex
+## Setup Mapnik and tirex
 
 Clone the mapnik repository via `git clone https://github.com/mapnik/mapnik` and enter the `mapnik/` directory.
 
