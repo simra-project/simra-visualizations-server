@@ -53,6 +53,7 @@ Now restart the terminal or execute `source ~/.bashrc` and check whether the ins
 Lastly, start django by executing `python manage.py runserver` in the `api/` directory.
 
 Python packages which have to be installed after (TODO: Add to requirements.txt):
+
 - `rdp`
 - `geopy`
 - `gpxpy`
@@ -83,7 +84,7 @@ To quit the CLI, type `\q` and press enter.
 
 (The steps above where taken from [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial.)
 
-Install postgis via `sudo apt install postgis`. Next, you need to log into the database as the `postgres` user and activate PostGIS by executing  `CREATE EXTENSION postgis;`. The `SELECT PostGIS_full_version();` should yield version 2.4.3.Log out again.
+Install postgis via `sudo apt install postgis`. Next, you need to log into the database as the `postgres` user and activate PostGIS by executing `CREATE EXTENSION postgis;`. The `SELECT PostGIS_full_version();` should yield version 2.4.3.Log out again.
 
 We recommend the tool pgAdmin4 for managing the PostgreSQL database because it allows for geo data visualization. It can be installed, following [this tutorial](https://www.pgadmin.org/download/pgadmin-4-apt/).
 
@@ -117,7 +118,7 @@ make test # This yields 6 errors if your OS username is not 'simra' but you can 
 sudo make install
 ```
 
-Install `python-mapnik` by using apt: `sudo apt install python-mapnik`. *Attention!* This could yield errors, as this is probably not meant for mapnik 3.0.x!
+Install `python-mapnik` by using apt: `sudo apt install python-mapnik`. _Attention!_ This could yield errors, as this is probably not meant for mapnik 3.0.x!
 
 For tirex we first need a new user:
 
@@ -142,7 +143,7 @@ make
 sudo make install
 ```
 
-Check whether `/etc/tirex/` and `/usr/lib/tirex/` exist. If not, something went wrong and you should restart the Tirex setup. 
+Check whether `/etc/tirex/` and `/usr/lib/tirex/` exist. If not, something went wrong and you should restart the Tirex setup.
 
 Tirex needs some additional directories to run, so create them now: `sudo mkdir /var/lib/tirex/ /var/run/tirex/ /var/log/tirex/`
 
@@ -152,7 +153,7 @@ Now, remove the initial Mapnik directory of Tirex via `sudo rmdir /etc/tirex/ren
 
 Next, remove all content from the `openseamap/` directory via `sudo rm -r /etc/tirex/renderer/openseamap/*`.
 
-Execute `sudo mkdir /var/lib/tirex/tiles` to create the Tirex tiles folder and for each config file in `tileserver/mapnik_config/` create a folder of the same name in `/var/lib/tirex/tiles/`: `sudo mkdir incident-combined popularity-combined relative-speed-aggregated relative-speed-single rides-density_all rides-density_rushhourevening rides-density_rushhourmorning rides-density_weekend rides-original stoptimes surface-quality-aggregated surface-quality-single`. Grant permission via `sudo chown tirex:tirex -R /var/lib/tirex`.
+Execute `sudo mkdir /var/lib/tirex/tiles` to create the Tirex tiles folder and for each config file in `tileserver/mapnik_config/` create a folder of the same name in `/var/lib/tirex/tiles/`: `sudo mkdir incident-combined popularity-combined relative-speed-aggregated relative-speed-single rides-density_all rides-density_rushhourevening rides-density_rushhourmorning rides-density_weekend rides-original stoptimes surface-quality-aggregated surface-quality-single popularity-score popularity-combined popularity-original_avoided popularity-original_chosen popularity_w-incidents_combined popularity_w-incidents_score popularity-original_w-incidents_avoided popularity-original_w-incidents_chosen`. Grant permission via `sudo chown tirex:tirex -R /var/lib/tirex`.
 
 Then copy the service files `tirex-backend-manager.service` and `tirex-master.service` into the systems service folder. Both service files can be found inside the directory `tileserver/config/` inside this repository.
 
@@ -197,7 +198,7 @@ TODO: Can the apt-get commands be executed together?
 
 Now run `pip install -r requirements.txt` again.
 
-*Attention!* `mapnik==3.0.23` was removed from `requirements.txt`. TODO: Put back in there?
+_Attention!_ `mapnik==3.0.23` was removed from `requirements.txt`. TODO: Put back in there?
 
 Navigate into the `api/` directory (if necessary, remove `SimRaAPI/migrations/`) and run:
 
@@ -223,7 +224,7 @@ If not done yet, install Java on your system: `sudo apt install default-jdk`.
 
 Now start the web server by executing `java -jar ./graphhopper/graphhopper-web-3.0.jar server ./graphhopper/config.yml`. **Make sure this service is running before importing any GPS data.** TODO: Make `start.sh` executable: You can also use the startup script provided in the same folder. To do so, give it execution permission by calling `chmod +x ./graphhopper/start.sh`. Now you can start the Graphhopper web server via `./graphhopper/start.sh`.
 
-*Notice: Starting the service can take a while as it will create a graph inside `graph-cache/`.*
+_Notice: Starting the service can take a while as it will create a graph inside `graph-cache/`._
 
 ### Initial database population
 
