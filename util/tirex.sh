@@ -64,6 +64,10 @@ EOF
                 sudo rm -r /var/lib/tirex/tiles/popularity-original_avoided/*
                 sudo rm -r /var/lib/tirex/tiles/popularity-original_chosen/*
                 sudo rm -r /var/lib/tirex/tiles/popularity-score/*
+                sudo rm -r /var/lib/tirex/tiles/popularity_w-incidents_combined/*
+                sudo rm -r /var/lib/tirex/tiles/popularity-original_w-incidents_avoided/*
+                sudo rm -r /var/lib/tirex/tiles/popularity-original_w-incidents_chosen/*
+                sudo rm -r /var/lib/tirex/tiles/popularity_w-incidents_score/*
                 echo "Destroyed all map tiles files inside the popularity map folders."
             else
                 echo "Unknown command option. Can't empty the directory. Use -h for available options."
