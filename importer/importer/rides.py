@@ -95,11 +95,15 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
             try:
                 if row["acc"]:
                     if float(row["acc"]) > 100.0:  # ride goes to trash
-                        settings.logging.info("Ride is filtered due to accuracies > 100m")
+                        settings.logging.info(
+                            "Ride is filtered due to accuracies > 100m"
+                        )
                         return
                     accuracies.append(float(row["acc"]))
             except KeyError:
-                settings.logging.error("Key error: One of the CSV table attributes is missing.")
+                settings.logging.error(
+                    "Key error: One of the CSV table attributes is missing."
+                )
                 return
             # timeStamp is in Java TS Format
             timestamps.append(datetime.utcfromtimestamp(int(row["timeStamp"]) / 1000))
@@ -134,7 +138,9 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
             ride, accelerations
         )
     except ValueError as e:
-        settings.logging.info("ValueError: Latitude normalization has been prohibited in the newer versions of geopy.")
+        settings.logging.info(
+            "ValueError: Latitude normalization has been prohibited in the newer versions of geopy."
+        )
         return
     ride_sections_velocity = velocity_service.process_velocity(ride)
 
@@ -147,6 +153,8 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     map_matched = map_match_service.map_match(ride)
     if len(map_matched) == 0:
         return
+    # Geographical length of the map matched trajectory
+    map_matched_length = calculate_geographical_length(cur, map_matched)
 
     # Determine remaining attributes
     ls = LineString(ride.raw_coords_filtered, srid=4326)
@@ -159,6 +167,8 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     # Process shortest path
     sp = shortest_path_service.query_shortest_path_server(start, end)
     shortest_path = LineString(sp, srid=4326)
+    # Geographical lengths of the shortest path
+    shortest_path_length = calculate_geographical_length(cur, sp)
 
     # Process legs from the rides data
     # Get set of OSM legs blonging to the shortest path of a trajectory
@@ -174,6 +184,7 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         phone_loc,
         ride_sections_velocity,
         incident_locs,
+        is_detour(map_matched_length, shortest_path_length),
     )
 
     # Process trajectory stops
@@ -209,10 +220,6 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     except Exception as e:
         settings.logging.exception("Can't create velocity ride segments.")
         raise (e)
-
-    # Process street segement popularity
-    # TODO: Process street segment popularity in a service by calculating some score or so. Maybe
-    # just do it inside the leg_service
     # <------- End of entity processing pipeline
 
     # Save the ride into the database
@@ -229,6 +236,53 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     except:
         settings.logging.exception(f"Problem parsing {filename}")
         raise Exception("Can not parse ride!")
+
+
+def calculate_geographical_length(cur, coo_arr):
+    """Builds a Linestring out of an array of coordinates and applies
+    the PostGIS function ST_LENGTH with SRID=4326 to it.
+
+    Parameters
+    ----------
+    cur : DatabaseConnection
+    coo_arr : float[]
+        Array of coordinates.
+
+    Returns
+    -------
+    float
+        Length of the geographical linestring in meters.
+    """
+    coo_string = ""
+    for coo in coo_arr:
+        coo_string += str(coo[0]) + " " + str(coo[1]) + ","
+
+    query_string = f"SELECT ST_Length(ST_GeomFromText('LINESTRING({coo_string[:-1]})',4326)::geography);"
+    cur.execute(query_string)
+    return cur.fetchone()[0]
+
+
+def is_detour(traj_lgth, sp_lgth):
+    """Determines whether the original trajectory should be counted
+    as a detour, because it surmounts the threshold parameters for
+    detours.
+
+    Parameters
+    ----------
+    traj_lgth : float
+        Geographical length of the trajectory in meters.
+    sp_lgth : float
+        Geographical length of the shortest path in meters.
+
+    Returns
+    -------
+    bool
+        Whether the trajectory is counted as a detour.
+    """
+    return (
+        traj_lgth - traj_lgth * settings.DETOUR_THRESHOLD_PERCENT > sp_lgth
+        and traj_lgth > sp_lgth + settings.DETOUR_THRESHOLD_METER
+    )
 
 
 def is_teleportation(timestamps):

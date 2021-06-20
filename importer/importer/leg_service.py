@@ -22,6 +22,7 @@ Methods
 """
 
 import pandas as pd
+from postgis.linestring import LineString
 from settings import logging
 
 POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE = 0.00002
@@ -137,6 +138,7 @@ def update_legs(
     phone_loc,
     velocity_sections,
     incident_locs,
+    is_detour,
 ):
     """Calculates measures for legs belonging to a specific ride and
     save the new information into the database.
@@ -151,6 +153,9 @@ def update_legs(
         trajectory.
     phone_loc
         The location of the phone during the ride.
+    is_detour : bool
+        Whether the trajectory should be counted as a detour because
+        it exceeds the threshold parameters.
     """
     # Current state of the OSM service legs
     df = pd.DataFrame(
@@ -187,26 +192,28 @@ def update_legs(
         if is_evening(ride.timestamps):
             df.at[i, "evening_count"] += 1
 
-    # All legs which where not traversed and which are part of the
-    # shortest trajectory.
-    avoided = list(
-        filter(
-            lambda shortest_path_sleg: True
-            if shortest_path_sleg not in legs
-            else False,
-            shortest_path_legs,
+    # Increase avoided and chosen counters, if trajectory was a detour.
+    if is_detour:
+        # All legs which where not traversed and which are part of the
+        # shortest trajectory.
+        avoided = list(
+            filter(
+                lambda shortest_path_sleg: True
+                if shortest_path_sleg not in legs
+                else False,
+                shortest_path_legs,
+            )
         )
-    )
-    update_avoided_legs(avoided, cur)
+        update_avoided_legs(avoided, cur)
 
-    # All legs which where travered but which are not part of the
-    # shortest trajectory.
-    chosen = list(
-        filter(lambda sleg: True if sleg not in shortest_path_legs else False, legs)
-    )
-    for idx, leg in enumerate(legs):
-        if leg in chosen:
-            df.at[idx, "chosen_count"] += 1
+        # All legs which where travered but which are not part of the
+        # shortest trajectory.
+        chosen = list(
+            filter(lambda sleg: True if sleg not in shortest_path_legs else False, legs)
+        )
+        for idx, leg in enumerate(legs):
+            if leg in chosen:
+                df.at[idx, "chosen_count"] += 1
 
     # Create a temporary table to buffer updated leg information
     cur.execute(
