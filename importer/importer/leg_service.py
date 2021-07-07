@@ -22,8 +22,6 @@ Methods
 """
 
 import pandas as pd
-from postgis.linestring import LineString
-from settings import logging
 
 POSTGIS_SURROUNDING_RIDE_BUFFER_SIZE = 0.00002
 

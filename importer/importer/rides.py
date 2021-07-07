@@ -77,8 +77,6 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
     phone_loc : bool
         1, if the phone was attached to the handlebar, 0 otherwise.
         If 1, street quality can be calculated from the sensor data.
-    incident_locs :
-        TODO:
     """
 
     data = csv.DictReader(data[1:], delimiter=",")
@@ -132,13 +130,12 @@ def handle_ride(data, filename, cur, phone_loc, incident_locs):
         settings.logging.info("Ride is filtered due to teleportation")
         return
 
-    # TODO: Catch exception
     try:
         IRI, ride_sections_surface = surface_quality_service.process_surface(
             ride, accelerations
         )
     except ValueError as e:
-        settings.logging.info(
+        settings.logging.exception(
             "ValueError: Latitude normalization has been prohibited in the newer versions of geopy."
         )
         return

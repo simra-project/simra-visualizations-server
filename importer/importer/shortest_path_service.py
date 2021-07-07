@@ -1,8 +1,5 @@
 import requests
 import json
-from postgis import Point
-from settings import logging
-import leg_service
 
 
 def query_shortest_path_server(start, end):

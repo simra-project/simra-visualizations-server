@@ -1,7 +1,7 @@
 """Collection of entity classes.
 
 Classes
-----------
+-------
 ParsedFiles
 Ride
 Profile
@@ -21,7 +21,7 @@ class ParsedFiles(models.Model):
     """A class used to represent a parsed CSV file of a bicycle ride.
 
     Attributes
-    -------
+    ----------
     filename : CharField
         The name of the CSV file the ride was imported from.
     fileType : CharField
@@ -42,7 +42,7 @@ class Ride(models.Model):
     """A class used to represent a bicycle ride.
 
     Attributes
-    -------
+    ----------
     timestamps : ArrayField(DateTimeField)
         The time stamps of the GPS measurements.
     filename : CharField
@@ -72,7 +72,7 @@ class Profile(models.Model):
     """A class used to represent a user profile of the SimRa application.
 
     Attributes
-    -------
+    ----------
     birth : IntegerField
         Birth year group.
     gender : IntegerField
@@ -109,7 +109,7 @@ class Incident(models.Model):
     """A class used to represent a near miss incident.
 
     Attributes
-    -------
+    ----------
     rideTimestamp : DateTimeField
         Time stamp of when the incident happened.
     bikeType : IntegerField
@@ -121,7 +121,6 @@ class Incident(models.Model):
     pLoc : IntegerField
         Location of the phone during the ride.
     incident : IntegerField
-        TODO:
     iType : IntegerField
         The other participant involved in the incident.
     scary : BooleanField
@@ -154,7 +153,7 @@ class RideSegmentSurface(models.Model):
     """The surface quality of a ride segment.
 
     Attributes
-    -------
+    ----------
     geom : LineStringField
         The coordinates of the ride segment.
     score : FloatField
@@ -169,7 +168,7 @@ class RideSegmentVelocity(models.Model):
     """The velocity of a ride segment.
 
     Attributes
-    -------
+    ----------
     geom : LineStringField
         The coordinates of the ride segment.
     velocity : FloatField

@@ -34,7 +34,7 @@ if __name__ == "__main__":
                     profile.handle_profile(file, cur)
                     continue
                 else:
-                    print(file)
+                    logging.info(file)
                     rides.handle_ride_file(file, cur)
 
                 cur.execute(
@@ -49,5 +49,5 @@ if __name__ == "__main__":
                     ],
                 )
         except Exception as e:
+            logging.exception(f"Skipped ride {filename} due to exception {e}")
             raise (e)
-            print(f"Skipped ride {filename} due to exception {e}")

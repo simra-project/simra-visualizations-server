@@ -2,7 +2,7 @@ import logging
 
 # Possible debug levels are CRITICAL, ERROR, WARNING, INFO and DEBUG.
 logging.basicConfig(
-    level=logging.INFO, format="%(levelname)s - %(module)s - %(message)s"
+    level=logging.WARNING, format="%(levelname)s - %(module)s - %(message)s"
 )
 
 # The directory to import the SimRa generated CSV files from.
