@@ -58,11 +58,11 @@
                     SELECT
                         *,
                         -- Mixed Popularity-Score
-                        ROUND((((1 - a_score) + c_score + (2 - s_score * 2.0)) / 4), 2) as p_mscore
+                        ROUND((((1 - a_score) + c_score + s_score * 2.0) / 4), 2) as p_mscore
                     FROM (
                         SELECT
                             *,
-                            -- Safety-Score between 0 and 1 (see nesting SQL for distinction of cases)
+                            -- Safety-Score between 0 and 1
                             ROUND(1 - GREATEST(LEAST((1.0 * ("normalIncidentCount" + 4.4 * "scaryIncidentCount") / "count" * ST_Length(geom::geography)), 1), 0)::numeric, 2) as s_score,
                             -- Avoided-Score between 0 and 2
                             CASE

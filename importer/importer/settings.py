@@ -33,8 +33,9 @@ COVERED_DISTANCE_INSIDE_STOP_FOR_VELOCITY_THRESHOLD = (
 GET_ALL_SURFACE_SCORES = False
 
 # Percentage at which an alternate route is counted as a detour. E.g.
-# 1.1 for when an alternative route can cover 10% more length before
+# 0.1 for when an alternative route can cover 10% more length before
 # it is considered as a detour.
-DETOUR_THRESHOLD = 1.1
+DETOUR_THRESHOLD_PERCENT = 0.1
+DETOUR_THRESHOLD_METER = 10
 
 logging.info("Loaded")
