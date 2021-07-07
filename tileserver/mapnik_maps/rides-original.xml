@@ -15,7 +15,7 @@
             <MarkersSymbolizer fill="#32c0dc" stroke-width="0.0"/>
         </Rule>
     </Style>
-    <Layer name="rides" srs="+proj=latlong">
+    <Layer name="rides" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>ride</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
@@ -26,7 +26,7 @@
             <Parameter name="table">public."SimRaAPI_ride"</Parameter>
         </Datasource>
     </Layer>
-    <Layer name="incidents" srs="+proj=latlong">
+    <Layer name="incidents" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>incident</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
