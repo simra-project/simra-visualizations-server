@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+    tileserver:
+        build: tileserver
+        links:
+            - database
+        # volumes:
+        #     - "./tileserver/mapnik_config:/etc/tirex/renderer/mapnik"
+        ports:
+            - 1337:80
+    
+    database:
+        build: database
+        restart: always
+        environment:
+            # POSTGRES_DB: simra
+            POSTGRES_USER: simra
+            POSTGRES_PASSWORD: simra12345simra
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080

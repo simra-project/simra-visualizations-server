@@ -20,7 +20,7 @@
         <StyleName>legs</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
-            <Parameter name="host">localhost</Parameter>
+            <Parameter name="host">database</Parameter>
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
@@ -60,7 +60,7 @@
         <StyleName>legs</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
-            <Parameter name="host">localhost</Parameter>
+            <Parameter name="host">database</Parameter>
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
@@ -100,7 +100,7 @@
         <StyleName>legs</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
-            <Parameter name="host">localhost</Parameter>
+            <Parameter name="host">database</Parameter>
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
@@ -140,7 +140,7 @@
         <StyleName>legs</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
-            <Parameter name="host">localhost</Parameter>
+            <Parameter name="host">database</Parameter>
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
@@ -180,7 +180,7 @@
         <StyleName>legs</StyleName>
         <Datasource>
             <Parameter name="type">postgis</Parameter>
-            <Parameter name="host">localhost</Parameter>
+            <Parameter name="host">database</Parameter>
             <Parameter name="dbname">simra</Parameter>
             <Parameter name="user">simra</Parameter>
             <Parameter name="password">simra12345simra</Parameter>
