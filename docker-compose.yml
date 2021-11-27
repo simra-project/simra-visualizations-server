@@ -1,12 +1,13 @@
-version: '3.1'
+version: '3.6'
 
 services:
     tileserver:
         build: tileserver
         links:
             - database
-        # volumes:
-        #     - "./tileserver/mapnik_config:/etc/tirex/renderer/mapnik"
+        volumes:
+            - "./tileserver/mapnik_config:/etc/tirex/renderer/mapnik"
+            - "./tileserver/mapnik_maps:/etc/tirex/maps/mapnik"
         ports:
             - 1337:80
     
@@ -22,4 +23,4 @@ services:
         image: adminer
         restart: always
         ports:
-            - 8080:8080
+            - 9000:8080
