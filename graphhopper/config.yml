@@ -1,0 +1,18 @@
+graphhopper:
+  datareader.file: /var/simra/pbf/dach-latest.osm.pbf
+  graph.dataaccess: MMAP_STORE
+  graph.location: graph-cache
+  graph.flag_encoders: bike
+  profiles:
+    - name: bike
+      vehicle: bike
+      weighting: fastest
+
+server:
+  application_connectors:
+  - type: http
+    port: 8989
+    bind_host: localhost
+  - type: http
+    port: 8990
+    bind_host: localhost

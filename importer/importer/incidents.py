@@ -10,7 +10,7 @@ def handle_incidents(data, filename, cur):
     pLoc = -1
     incidents = []
     for row in data:
-        rideTimestamp = datetime.utcfromtimestamp(int(row.get("ts", 0)) / 1000)
+        rideTimestamp = datetime.utcfromtimestamp(int(row.get("ts", 0) or 0) / 1000)
         bikeType = row.get("bike", -1)
         childCheckbox = row.get("childCheckBox", 0) == "1"
         trailerCheckbox = row.get("trailerCheckBox", 0) == "1"
@@ -27,7 +27,7 @@ def handle_incidents(data, filename, cur):
             i += 1
         scary = row.get("scary", 0) == "1"
         desc = row.get("desc", "")
-        geom = Point(row["lon"], row["lat"], srid=4326)
+        geom = Point(row.get("lon", 0) or 0, row.get("lat", 0) or 0, srid=4326)
         cur.execute("""
             INSERT INTO public."SimRaAPI_incident" ("rideTimestamp", "bikeType", "childCheckbox", "trailerCheckbox", "pLoc", "incident", "iType", "scary", "desc", "filename", "geom") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
         """, [rideTimestamp, bikeType, childCheckbox, trailerCheckbox, pLoc, incident, iType, scary, desc, filename, geom])

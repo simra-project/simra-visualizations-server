@@ -1,4 +1,18 @@
 __pycache__/
 csvdata/*
 *.zip
+build/
+
+# IDE settings
 .idea
+.vscode
+
+/importer/build/
+/importer/dist/
+/importer/SimRa_Importer.egg-info
+/api/SimRaAPI/migrations/
+
+# Graphhopper service and map data
+graphhopper/*.pbf
+graphhopper/*.jar
+graph-cache/
