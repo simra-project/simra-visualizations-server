@@ -2,7 +2,9 @@ version: '3.6'
 
 services:
     tileserver:
-        build: tileserver
+        build:
+            context: ./tileserver
+        image: tharkay/simra-visualizations-server_tileserver
         links:
             - database
         volumes:
